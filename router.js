@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-import {Routes} from './routes.js';
+import { Routes } from './routes.js';
 
 // We cache the origin since it can't change
 const origin = location.origin || location.protocol + '//' + location.host;
@@ -31,7 +31,9 @@ export class Router extends Routes {
         window.addEventListener('popstate', this._onPopState);
         // Kick off routed rendering by going to the current URL
         console.log('[ROUTER-001] Router connected, navigating to:', window.location.pathname);
-        this._safeNavigate(() => this.goto(window.location.pathname));
+
+
+        this._safeNavigate(() => this.goto(this._reconstructPath(window.location)));
     }
 
     hostDisconnected() {
@@ -67,8 +69,8 @@ export class Router extends Routes {
      * URL bar when navigating programmatically. It properly coordinates
      * leave callbacks to ensure URL updates only happen if navigation succeeds.
      *
-     * @param {string} pathname - The path to navigate to
-     * @param {Object} params - Optional parameters to pass to the route
+     * @param {string} pathname - The path to navigate to, optionally you can pass searchParams
+     * @param {{ [k:string]: string, searchParams: URLSearchParams | Record<string, string> }} params - Optional parameters to pass to the route. Use reserved searchParams to attach a queryString
      */
     async goto(pathname, params = {}) {
         // Prevent navigation if router is destroyed
@@ -80,16 +82,25 @@ export class Router extends Routes {
         pathname = pathname || '/';
 
         // Store the original pathname in case we need to revert
-        const originalPathname = window.location.pathname;
-        const originalSearch = window.location.search;
-        const originalHash = window.location.hash;
-        const originalUrl = originalPathname + originalSearch + originalHash;
+        const currentPath = this._reconstructPath(window.location);
+        const currentPathname = window.location.pathname;
+        // destructure intended route
+        const nextUrl = new URL(pathname, origin);
+        const nextUrlHash = nextUrl.hash.slice(1);
+        const nextPathname = nextUrl.pathname;
+
+        const { searchParams, ...extraParams } = params
+        const mergedSearchParams = Object.assign(
+            {},
+            getRawSearchParams(searchParams ?? {}),
+            getRawSearchParams(nextUrl.searchParams)
+        );
 
         let urlWasUpdated = false;
 
         try {
             // Validate pathname
-            if (typeof pathname !== 'string' || pathname === '') {
+            if (typeof pathname !== 'string' || nextPathname === '') {
                 throw new Error(
                     'Invalid pathname: pathname must be a non-empty string'
                 );
@@ -97,10 +108,14 @@ export class Router extends Routes {
 
             // First call parent implementation to handle routing logic and leave callbacks
             // This will call leave callbacks and potentially block navigation
-            await super.goto(pathname, params);
+            await super.goto(nextPathname, {
+                extraParams,
+                searchParams: mergedSearchParams,
+                hash: nextUrlHash
+            });
 
             // Only update browser URL after leave callbacks have approved and navigation succeeded
-            if (pathname !== originalPathname) {
+            if (nextPathname !== currentPathname) {
                 try {
                     window.history.pushState({}, '', pathname);
                     urlWasUpdated = true;
@@ -112,7 +127,7 @@ export class Router extends Routes {
             // If navigation failed, revert the URL change
             if (urlWasUpdated) {
                 try {
-                    window.history.replaceState({}, '', originalUrl);
+                    window.history.replaceState({}, '', currentPath);
                 } catch (revertError) {
                     console.error(
                         'Failed to revert URL after navigation error:',
@@ -185,4 +200,30 @@ export class Router extends Routes {
             );
         });
     };
+
+    /**
+     * 
+     * @param {Location} location 
+     * @returns 
+     */
+    _reconstructPath(location) {
+        const { pathname, search, hash } = location;
+        return `${pathname}${search}${hash}`;
+    }
+}
+
+
+/**
+ * 
+ * @param {URLSearchParams | Object} input 
+ */
+function getRawSearchParams(searchParams) {
+    if (searchParams instanceof URLSearchParams) {
+        return Object.fromEntries(searchParams.entries());
+    }
+    if (typeof searchParams === 'object') {
+        return searchParams;
+    }
+
+    throw new Error('Invalid searchParams: must be URLSearchParams or Object');
 }

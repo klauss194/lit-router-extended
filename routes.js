@@ -43,7 +43,7 @@ export const getPattern = (route) => {
                 const pathname = typeof input === 'string' ? input : input.pathname;
                 const matchResult = routerScorer.matchPathAdvanced(pathname, compiled);
                 if (!matchResult) return null;
-                
+
                 return {
                     pathname: {
                         groups: matchResult.params,
@@ -139,7 +139,9 @@ export class Routes {
     _currentPathname = undefined;
     _currentRoute = undefined;
     _currentParams = {};
-    _currentPassedParams = {};
+    _currentExtraParams = {};
+    _currentSearchParams = {};
+    _currentHash = {};
 
     /**
      * Callback to call when this controller is disconnected.
@@ -181,7 +183,7 @@ export class Routes {
                 typeof childRoutes._currentRoute.leave === 'function'
             ) {
                 // Pass merged params to child's leave callback
-                const childMergedParams = {...childRoutes._currentParams, ...childRoutes._currentPassedParams};
+                const childMergedParams = { ...childRoutes._currentParams, ...childRoutes._currentPassedParams };
                 const canChildLeave = await childRoutes._currentRoute.leave(childMergedParams);
                 if (canChildLeave === false) {
                     return false;
@@ -205,19 +207,26 @@ export class Routes {
      * pattern with a tail wildcard pattern (`/*`).
      *
      * @param {string} pathname - The path to navigate to
-     * @param {Object} params - Optional parameters to pass to the route
+     * @param {{ searchParams: object, extraParams: object, hash: string }} [context={}] - Additional parameters to pass to the route
      */
-    async goto(pathname, params = {}) {
-        console.log('[ROUTER-002] goto called with pathname:', pathname, 'params:', params);
-        console.log('[PARAM-TRACE] Routes.goto - pathname:', pathname, 'passed params:', params);
+    async goto(pathname, context = {}) {
+        console.log('[ROUTER-002] goto called with pathname:', pathname, 'params:', context);
+        console.log('[PARAM-TRACE] Routes.goto - pathname:', pathname, 'passed params:', context);
         console.log('[ROUTER] Current routes:', this.routes.map(r => r.path));
-        return this._gotoInternal(pathname, false, params);
+        return this._gotoInternal(pathname, false, context);
     }
 
     /**
-     * Internal navigation method that can optionally skip leave callbacks for recovery
+     * Handles internal navigation to a specified pathname, ensuring proper sequencing
+     * and avoiding race conditions by waiting for any pending navigation to complete.
+     *
+     * @param {string} pathname - The target path to navigate to.
+     * @param {boolean} [skipLeaveCallbacks=false] - Whether to skip executing leave callbacks during navigation.
+     * @param {{ searchParams: object, extraParams: object, hash: string }} [context={}] - Additional context to pass along with the navigation.
+     * 
+     * @returns {Promise<void>} A promise that resolves when the navigation is complete.
      */
-    async _gotoInternal(pathname, skipLeaveCallbacks = false, params = {}) {
+    async _gotoInternal(pathname, skipLeaveCallbacks = false, context = {}) {
         // Wait for any pending navigation to complete to prevent race conditions
         if (this._pendingNavigation) {
             try {
@@ -233,7 +242,7 @@ export class Routes {
             pathname,
             navigationId,
             skipLeaveCallbacks,
-            params
+            context
         );
         this._pendingNavigation = navigationPromise;
 
@@ -256,8 +265,13 @@ export class Routes {
 
     /**
      * Perform the actual navigation with proper error handling and state management
+     * 
+     * @param {string} pathname The cleaned url's pathname section 
+     * @param {number} navigationId 
+     * @param {boolean} skipLeaveCallbacks default is true
+     * @param {{ searchParams: object, extraParams: object, hash: string }} context default is {}
      */
-    async _performNavigation(pathname, navigationId, skipLeaveCallbacks = false, passedParams = {}) {
+    async _performNavigation(pathname, navigationId, skipLeaveCallbacks = false, context = {}) {
         // Check if this navigation is still valid (not superseded by newer navigation)
         const isCurrentNavigation = () => this._navigationId === navigationId;
 
@@ -277,7 +291,11 @@ export class Routes {
             typeof this._currentRoute.leave === 'function'
         ) {
             // Pass merged params to leave callback
-            const mergedParams = {...this._currentParams, ...this._currentPassedParams};
+            const mergedParams = this._mergeParams(this._currentParams, {
+                extraParams: this._currentExtraParams,
+                searchParams: this._currentSearchParams,
+                hash: this._currentHash
+            });
             const canLeave = await this._currentRoute.leave(mergedParams);
             // If leave() returns false, cancel this navigation
             if (canLeave === false) {
@@ -312,20 +330,20 @@ export class Routes {
             tailGroup = pathname;
             this._currentPathname = '';
             // Simulate a tail group with the whole pathname
-            this._currentParams = {0: tailGroup};
-            this._currentPassedParams = passedParams;
+            this._currentParams = { 0: tailGroup };
+            this._currentExtraParams = context.extraParams;
         } else {
             const route = this._getRoute(pathname);
             if (route === undefined) {
                 throw new Error(`No route found for ${pathname}`);
             }
             const pattern = getPattern(route);
-            const result = pattern.exec({pathname});
+            const result = pattern.exec({ pathname });
             const params = (result && result.pathname && result.pathname.groups) || {};
             tailGroup = getTailGroup(params);
             if (typeof route.enter === 'function') {
                 // Pass merged params to enter callback
-                const mergedParams = {...params, ...passedParams};
+                const mergedParams = this._mergeParams(this._currentParams, context);
                 const success = await route.enter(mergedParams);
                 // If enter() returns false, cancel this navigation
                 if (success === false) {
@@ -341,8 +359,11 @@ export class Routes {
             // Only update route state if the enter handler completes successfully
             this._currentRoute = route;
             this._currentParams = params;
-            this._currentPassedParams = passedParams;
-            console.log('[PARAM-TRACE] _performNavigation - storing URL params:', params, 'passed params:', passedParams);
+            this._currentExtraParams = context.extraParams;
+            this._currentSearchParams = context.searchParams;
+            this._currentHash = context.hash;
+
+            console.log('[PARAM-TRACE] _performNavigation - storing URL params:', params, 'passed params:', context);
             this._currentPathname =
                 tailGroup === undefined
                     ? pathname
@@ -352,7 +373,7 @@ export class Routes {
         // Propagate the tail match to children
         if (tailGroup !== undefined) {
             for (const childRoutes of this._childRoutes) {
-                childRoutes.goto(tailGroup, passedParams);
+                childRoutes.goto(tailGroup, context);
             }
         }
 
@@ -367,7 +388,9 @@ export class Routes {
                     pathname: this._currentPathname, // Local pathname fragment
                     fullPath: fullPath, // Complete path for NavigationStateService
                     params: this._currentParams,
-                    passedParams: this._currentPassedParams,
+                    passedParams: this._currentExtraParams,
+                    searchParams: this._currentSearchParams,
+                    hash: this._currentHash,
                     route: this._currentRoute
                 },
                 bubbles: true,
@@ -384,10 +407,14 @@ export class Routes {
         if (!this._currentRoute || !this._currentRoute.render) {
             return undefined;
         }
-        
+
         // Merge URL params and passed params, with passed params taking precedence
-        const mergedParams = {...this._currentParams, ...this._currentPassedParams};
-        console.log('[PARAM-TRACE] outlet() - URL params:', this._currentParams, 'passed params:', this._currentPassedParams, 'merged:', mergedParams);
+        const mergedParams = this._mergeParams(this._currentParams, {
+            extraParams: this._currentExtraParams,
+            searchParams: this._currentSearchParams,
+            hash: this._currentHash
+        });
+        console.log('[PARAM-TRACE] outlet() - URL params:', this._currentParams, 'passed params:', this._currentExtraParams, 'merged:', mergedParams);
         return this._currentRoute.render(mergedParams);
     }
 
@@ -395,7 +422,17 @@ export class Routes {
      * The current parsed route parameters.
      */
     get params() {
-        return this._currentParams;
+        return {
+            ...this._currentExtraParams,
+            ...this._currentParams
+        }
+    }
+
+    /**
+     * The current parsed route parameters.
+     */
+    get searchParams() {
+        return this._currentSearchParams;
     }
 
     /**
@@ -415,24 +452,24 @@ export class Routes {
             console.error('[Router] Invalid route: route must be an object');
             return false;
         }
-        
+
         if (!route.path || typeof route.path !== 'string') {
             console.error('[Router] Invalid route: missing or invalid path');
             return false;
         }
-        
+
         if (!route.render || typeof route.render !== 'function') {
             console.error('[Router] Invalid route: missing or invalid render function');
             return false;
         }
-        
+
         // Check if route with same path already exists
         const existingIndex = this.routes.findIndex(r => r.path === route.path);
         if (existingIndex !== -1) {
             console.warn(`[Router] Route with path "${route.path}" already exists at index ${existingIndex}`);
             return false;
         }
-        
+
         // Lock route modifications during navigation
         if (this._pendingNavigation) {
             console.warn('[Router] Cannot modify routes during navigation. Deferring operation...');
@@ -445,31 +482,31 @@ export class Routes {
             });
             return false;
         }
-        
+
         // Add route at specified index or at the end
         if (index !== undefined && index >= 0 && index <= this.routes.length) {
             this.routes.splice(index, 0, route);
         } else {
             this.routes.push(route);
         }
-        
+
         console.log(`[Router] Route added: ${route.path}`);
-        
+
         // Clear pattern cache for the new route
         patternCache.delete(route);
-        
+
         // Clear sorted routes cache since routes have changed
         sortedRoutesCache.delete(this);
-        
+
         // If the new route matches current pathname, trigger re-navigation
         if (this._currentPathname !== undefined) {
             const pattern = getPattern(route);
             if (pattern.test({ pathname: this._currentPathname })) {
                 console.log(`[Router] New route matches current path, re-navigating...`);
-                this.goto(this._currentPathname, this._currentPassedParams);
+                this.goto(this._currentPathname, this._currentExtraParams);
             }
         }
-        
+
         return true;
     }
 
@@ -484,7 +521,7 @@ export class Routes {
             console.error('[Router] Invalid argument: pathOrRoute is required');
             return null;
         }
-        
+
         // Lock route modifications during navigation
         if (this._pendingNavigation) {
             console.warn('[Router] Cannot modify routes during navigation. Deferring operation...');
@@ -496,10 +533,10 @@ export class Routes {
             });
             return null;
         }
-        
+
         let index = -1;
         let removedRoute = null;
-        
+
         if (typeof pathOrRoute === 'string') {
             // Remove by path
             index = this.routes.findIndex(r => r.path === pathOrRoute);
@@ -507,28 +544,28 @@ export class Routes {
             // Remove by route object reference
             index = this.routes.indexOf(pathOrRoute);
         }
-        
+
         if (index !== -1) {
             removedRoute = this.routes.splice(index, 1)[0];
             console.log(`[Router] Route removed: ${removedRoute.path}`);
-            
+
             // Clear pattern cache
             patternCache.delete(removedRoute);
-            
+
             // Clear sorted routes cache since routes have changed
             sortedRoutesCache.delete(this);
-            
+
             // If removed route was the current route, navigate to fallback or throw error
             if (this._currentRoute === removedRoute) {
                 console.warn('[Router] Removed current route, re-navigating...');
                 if (this._currentPathname !== undefined) {
-                    this.goto(this._currentPathname, this._currentPassedParams);
+                    this.goto(this._currentPathname, this._currentExtraParams);
                 }
             }
         } else {
             console.warn('[Router] Route not found for removal');
         }
-        
+
         return removedRoute;
     }
 
@@ -549,28 +586,28 @@ export class Routes {
             });
             return;
         }
-        
+
         // Clear pattern cache for all routes
         this.routes.forEach(route => patternCache.delete(route));
-        
+
         // Clear sorted routes cache
         sortedRoutesCache.delete(this);
-        
+
         // Clear routes array
         this.routes.length = 0;
-        
+
         if (!keepFallback) {
             this.fallback = undefined;
         }
-        
+
         console.log('[Router] All routes cleared');
-        
+
         // Reset current route state
         this._currentRoute = undefined;
-        
+
         // Try to re-navigate if we have a current pathname
         if (this._currentPathname !== undefined) {
-            this.goto(this._currentPathname, this._currentPassedParams);
+            this.goto(this._currentPathname, this._currentExtraParams);
         }
     }
 
@@ -607,7 +644,7 @@ export class Routes {
             console.error(`[Router] Route not found: ${path}`);
             return false;
         }
-        
+
         // Lock route modifications during navigation
         if (this._pendingNavigation) {
             console.warn('[Router] Cannot modify routes during navigation. Deferring operation...');
@@ -619,21 +656,21 @@ export class Routes {
             });
             return false;
         }
-        
+
         // Update route properties (except path)
         Object.keys(updates).forEach(key => {
             if (key !== 'path' && updates[key] !== undefined) {
                 route[key] = updates[key];
             }
         });
-        
+
         console.log(`[Router] Route updated: ${path}`);
-        
+
         // If this is the current route and render function changed, re-render
         if (this._currentRoute === route && updates.render) {
             this._host.requestUpdate();
         }
-        
+
         return true;
     }
 
@@ -653,27 +690,27 @@ export class Routes {
     _getRoute(pathname) {
         // Get sorted routes
         const sortedRoutes = this._getSortedRoutes();
-        
+
         console.log('[ROUTER] Looking for route for pathname:', pathname);
         console.log('[ROUTER] Testing against routes:', sortedRoutes.map(r => r.path));
-        
+
         // Find first matching route in score order
         const matchedRoute = sortedRoutes.find((r) => {
             const pattern = getPattern(r);
-            const matches = pattern.test({pathname: pathname});
+            const matches = pattern.test({ pathname: pathname });
             console.log(`[ROUTER] Testing ${pathname} against ${r.path}: ${matches}`);
             return matches;
         });
-        
+
         console.log('[ROUTER] Matched route:', matchedRoute ? matchedRoute.path : 'none');
-        
+
         if (matchedRoute || this.fallback === undefined) {
             return matchedRoute;
         }
         if (this.fallback) {
             // The fallback route behaves like it has a "/*" path. This is hidden from
             // the public API but is added here to return a valid RouteConfig.
-            return {...this.fallback, path: '/*'};
+            return { ...this.fallback, path: '/*' };
         }
         return undefined;
     }
@@ -685,12 +722,12 @@ export class Routes {
     _getSortedRoutes() {
         // Check if we have a cached sorted version
         let cachedData = sortedRoutesCache.get(this);
-        
+
         // If cache exists and routes haven't changed, return cached version
         if (cachedData && cachedData.routesSnapshot === this.routes) {
             return cachedData.sortedRoutes;
         }
-        
+
         // Score and sort routes
         const scoredRoutes = this.routes.map(route => {
             const pattern = getPattern(route);
@@ -701,29 +738,29 @@ export class Routes {
                 _specificity: pattern.specificity
             };
         });
-        
+
         // Sort by score (highest first)
         const sortedRoutes = [...scoredRoutes].sort((a, b) => {
             // Primary: Compare by total score
             const scoreDiff = b._score - a._score;
             if (scoreDiff !== 0) return scoreDiff;
-            
+
             // Secondary: If scores equal, compare by specificity
             const specificityDiff = b._specificity - a._specificity;
             if (specificityDiff !== 0) return specificityDiff;
-            
+
             // Tertiary: Maintain original order (first defined wins)
             const aIndex = this.routes.indexOf(a);
             const bIndex = this.routes.indexOf(b);
             return aIndex - bIndex;
         });
-        
+
         // Cache the sorted routes
         sortedRoutesCache.set(this, {
             routesSnapshot: this.routes,
             sortedRoutes: sortedRoutes
         });
-        
+
         return sortedRoutes;
     }
 
@@ -774,7 +811,23 @@ export class Routes {
 
         const tailGroup = getTailGroup(this._currentParams);
         if (tailGroup !== undefined) {
-            childRoutes.goto(tailGroup, this._currentPassedParams);
+            childRoutes.goto(tailGroup, this._currentExtraParams);
         }
     };
+
+    /**
+     * Builds merged parameters from the given context and route parameters.
+     * 
+     * @param {Object} params - The route parameters
+     * @param {{ searchParams: object, extraParams: object, hash: string }} context - The context object containing extraParams and searchParams
+     * @returns {Object} - The merged parameters
+     */
+    _mergeParams(params, context) {
+        return {
+            ...context.extraParams,
+            ...params,
+            hash: context.hash,
+            searchParams: context.searchParams
+        };
+    }
 }
