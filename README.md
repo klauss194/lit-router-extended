@@ -7,7 +7,7 @@ First Initial Version
 - goto() Methods updates the URLbar
 - EMIT global event on each navigation 
 - you can pass params to the goto() method -- >  just to retreive them in the render () method 
-- DOES NOT SUPPORT #,? ,& ( url Data) <-- feature released, tests in progress
+-  #,? ,& ( url Data) <-- feature released, tests in progress
   
 # LIT Router Extended
 
