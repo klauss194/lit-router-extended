@@ -9,85 +9,141 @@ First Initial Version
 - you can pass params to the goto() method -- >  just to retreive them in the render () method 
 - DOES NOT SUPPORT #,? ,& ( url Data) <-- work in progress
 
-# How to use ?
-Download the files and import the router just like in the /@lit-labs/router
+# LIT Router Extended
 
-Here is an example / excerpt form an app BUT original documentation still applies
+Intuitive routing for Lit framework, inspired by React Router's powerful and flexible route matching.
 
-```   _router = new Router(this, [
-      {
-          name: "landing",
-          path: "/landing",
-          render: () => html`<auth-welcome></auth-welcome>`,
-          leave:()=>{ console.log(" leaving Landing page ")}
-      },
-        {
-          name: "home",
-          path: "/",
-          enter: () => {
-            if (
-              authStore.usrObjndRole.value &&
-              authStore.userRole.value === "specialist"
-            ) {
-              this._router.goto("/specialist/orders");
-              return false;
-            }else if(!authStore.publicUserRole.value) {
-                this._router.goto("/landing");
-                return false;
-            }
-          },
-          render: () =>
-            authStore.usrObjndRole.value
-              ? authStore.userRole.value === "client"
-                ? html`<homepage-logged></homepage-logged>`
-                : html`<specialist-parent
-                    style="height: 100%; display: block"
-                  ></specialist-parent>`
-              : html`<home-page></home-page>`,
-        },
-        {
-      name: "client",
-      path: "/client/*",
-      render: () => html`<client-parent></client-parent>`,
-      leave: () => {
-        console.log(" leaving Client page ");
-      },
-    },
-        {
-          name: "specialist",
-          path: "/specialist/*",
-          render: () =>
-            html`<specialist-parent
-              style="height: 100%; display: block"
-            ></specialist-parent>`,
-        },
+---
 
-    {
-      name: "login",
-      path: "/login",
-      render: () =>
-        html`<authentication-page type="welcome"></authentication-page>`,
-    },
-    {
-      name: "profile",
-      enter: () => {
-        if (UserisNOTRole({ role: "specialist" })) {
-          console.log("User is not logged in or has wrong role");
-          this._router.goto("/");
-          return false; //reject the current route
+## Root Route
+
+The root route matches the base path of your application (`/` or empty string). It is typically used to render the main landing page or dashboard.
+
+**Example:**
+
+- `/` or empty string (` `) with or without spaces will be handled as root path.
+
+---
+
+## Static Segments
+
+Static segments are fixed path parts that match exactly. Use them for pages like `/about`, `/contact`, or `/dashboard`.
+
+**Example:**
+
+- `/about` will be handled as static route and matches `/about` or `/about/`. 
+
+---
+
+## Dynamic Segments
+
+Dynamic segments allow you to capture values from the URL using parameters. Prefix a segment with `:` to declare a parameter and can use camelCase or snakCase to named params like `:paramName` or `:param_name`.
+
+**Example:**
+
+- `/user/:userId` matches `/user/123`
+- `/post/:article_title` matches `/post/lit router docs` or `/post/lit-router-docs`.
+- `/user/:userId/profile` matches `/user/123/profile`
+- `/:postId/sections/:sectionId/edit` matches `/08372/sections/1253/edit`
+
+---
+
+## Optional params
+
+Optional params let you match routes with optional parammetter at the end of the path. Add a `?` after the parameter name to make it optional.
+
+**Example:**
+
+- `/search/:query?`: Matches `/search` and `/search/react`
+
+**Note**: Optional param be only available at the end of path.
+
+---
+
+## Optional Segments
+
+Optional segments let you match routes with optional segment at the end of the path. Add a `?` after the parameter name to make it optional.
+
+**Example:**
+
+- `/dashboard/legacy?`: Matches `/dashboard` and `/dashboard/legacy`
+
+**Note**: Optional param be only available at the end of path.
+
+---
+
+## Wildcard Segments
+
+Wildcards match any number of path segments. Use `*` for catch-all segments after and before a route.
+
+**Example:**
+
+- `/post/:postId/*`: Matches `/post/1230/getting start with lit router` 
+- `/landing/articles/*`: Matches `/landing/articles/getting start`
+- `*/license`: Matches `/lit-router/packages/router/license` **(No implemented yet)**
+
+**Note**: Willcard swegment be only available at the end of path.
+
+---
+
+## Catch-all
+
+Catch-all routes match any path not handled by other routes. Pathless routes (no `path` property) are useful for layouts or error boundaries.
+
+**Example:**
+
+- `/*`: Matches all non-defined routes and pass the value as `splat` on params.
+- `/:path*`: Matches all non-defined routes and pass it as named param.
+
+**using default splat**: 
+```js
+[
+    { 
+        path: '/*', 
+        render({ params }) {
+            return html`<h1>${params.splat}</h1>`
         }
-      },
-      path: "/profile",
-      render: () => html`<specialist-profile-page></specialist-profile-page>`,
-    },
-    {
-      name: "logout",
-      path: "/logout",
-      render: () => html`<logout-page></logout-page>`,
-    },
-    {
-      path: ":path(.*)",
-      render: () => html`<h2>Fallback for non existing links</h2>`,
-    },
-  ]);``` 
+    }
+]
+```
 
+**using named path**: 
+```js
+[
+    { 
+        path: '/:catchAll', 
+        render({ params }) {
+            return html`<h1>${params.catchAll}</h1>`
+        }
+    }
+]
+```
+
+---
+
+
+## Route Configuration Reference
+
+- `path`: The route path pattern (static, dynamic, optional, wildcard)
+- `render`: The component to render for the route
+- `enter`: (optional) A function called before navigation to the route. Return `false` to block navigation, or perform async checks (e.g., authentication).
+- `leave`: (optional) A function called before leaving the route. Return `false` to block navigation away, or perform cleanup logic.
+
+**Example:**
+```js
+const routes = [
+	{
+		path: "/dashboard",
+		render: () => html`<dashboard-page></dashboard-page>`,
+		enter: () => {
+			// Only allow if user is authenticated
+			if (!isAuthenticated()) return false;
+			return true;
+		},
+		leave: () => {
+			// Confirm before leaving dashboard
+			return window.confirm("Are you sure you want to leave the dashboard?");
+		}
+	}
+];
+```
