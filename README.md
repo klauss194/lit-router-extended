@@ -3,11 +3,11 @@ A fork of the original Lit Router (lit-labs router) that was written by Justing 
 First Initial Version
 - Ranking Scorer Instead of URLPattern ( URLPattern seems quite slow & heavy also not supported yet everywhere )
 - Keeps the same philosophy of original @lit-labs/router in terms of rendering & composition
-- added a leave() callback <-- this NEEDS MORE TESTING STILL IN TESTING FEATURE 
+- added a leave() callback <-- this works as intended BUT KEEP MIND OF  parents & children ( it fires for both since you're leaving two segments )
 - goto() Methods updates the URLbar
 - EMIT global event on each navigation 
 - you can pass params to the goto() method -- >  just to retreive them in the render () method 
--  #,? ,& ( url Data) <-- feature released, tests in progress
+-  #,? ,& ( url Data) 
   
 # LIT Router Extended
 
