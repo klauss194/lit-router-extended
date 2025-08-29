@@ -8,8 +8,9 @@ First Initial Version
 - EMIT global event on each navigation 
 - you can pass params to the goto() method -- >  just to retreive them in the render () method 
 -  #,? ,& ( url Data) 
-  
-# LIT Router Extended
+ 
+
+# LIT Router
 
 Intuitive routing for Lit framework, inspired by React Router's powerful and flexible route matching.
 
@@ -92,7 +93,7 @@ Catch-all routes match any path not handled by other routes. Pathless routes (no
 
 **Example:**
 
-- `/*`: Matches all non-defined routes and pass the value as `splat` on params.
+- `/*` and `*`: Matches all non-defined routes and pass the value as `splat` on params.
 - `/:path*`: Matches all non-defined routes and pass it as named param.
 
 **using default splat**: 
