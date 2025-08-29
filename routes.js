@@ -463,6 +463,12 @@ export class Routes {
             return false;
         }
 
+        route.path = route.path.trim();
+        if (route.path === '') {
+            // If the path is empty, treat it as the root path
+            route.path = '/';
+        }
+
         // Check if route with same path already exists
         const existingIndex = this.routes.findIndex(r => r.path === route.path);
         if (existingIndex !== -1) {

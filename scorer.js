@@ -50,20 +50,22 @@ export class ReactRouterScorer {
       wildcards: 0,
       depth: segments.length
     };
-
-    segments.forEach(segment => {
+    for (let i = 0; i < segments.length; i++) {
+      const segment = segments[i];
       if (segment === '*' || segment === '**') {
         breakdown.wildcards++;
       } else if (segment.startsWith(':')) {
         if (segment.endsWith('?')) {
           breakdown.optionalSegments++;
+        } else if (segment.endsWith('*')) {
+          breakdown.wildcards++;
         } else {
           breakdown.dynamicSegments++;
         }
       } else {
         breakdown.staticSegments++;
       }
-    });
+    }
 
     // Calculate final score using React Router's ranking approach
     let score = 0;
@@ -106,7 +108,9 @@ export class ReactRouterScorer {
     // Make leading slash optional for child routes
     let regexPattern = '^/?';
 
-    segments.forEach((segment, index) => {
+    for (let index = 0; index < segments.length; index++) {
+      const segment = segments[index];
+
       if (index > 0) {
         regexPattern += '/';
       }
@@ -121,11 +125,18 @@ export class ReactRouterScorer {
         params.push('**');
       } else if (segment.startsWith(':')) {
         // Dynamic parameter
-        const paramName = segment.slice(1).replace('?', '');
+        const paramName = segment.slice(1).replace(/[\W_]/g, '');
         const isOptional = segment.endsWith('?');
+        const isWildcard = segment.endsWith('*');
 
         if (isOptional) {
+          if (index > 0) {
+            regexPattern += '?';
+          }
+
           regexPattern += '([^/]*?)';
+        } else if (isWildcard) {
+          regexPattern += '([^/].+)';
         } else {
           regexPattern += '([^/]+)';
         }
@@ -133,9 +144,20 @@ export class ReactRouterScorer {
         params.push(paramName);
       } else {
         // Static segment - escape special regex characters
-        regexPattern += segment.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const escapedSegment = segment.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+        if (segment.endsWith('?')) {
+          if (index > 0) {
+            regexPattern += '?';
+          }
+          regexPattern += `(${escapedSegment.slice(0, -2)})?`;
+        } else if (segment.endsWith('*')) {
+          regexPattern += `(${escapedSegment.slice(0, -2)}.+)`;
+        } else {
+          regexPattern += escapedSegment;
+        }
       }
-    });
+    }
 
     // Handle optional trailing slash and end of string
     regexPattern += '/?$';

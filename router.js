@@ -33,7 +33,7 @@ export class Router extends Routes {
         console.log('[ROUTER-001] Router connected, navigating to:', window.location.pathname);
 
 
-        this._safeNavigate(() => this.goto(this._reconstructPath(window.location)));
+        this._safeNavigate(() => this.goto(combineLocationParts(window.location)));
     }
 
     hostDisconnected() {
@@ -79,22 +79,21 @@ export class Router extends Routes {
         }
 
         // Normalize pathname
-        pathname = pathname || '/';
+        pathname = pathname?.trim() || '/';
 
         // Store the original pathname in case we need to revert
-        const currentPath = this._reconstructPath(window.location);
+        const currentPath = combineLocationParts(window.location);
         const currentPathname = window.location.pathname;
         // destructure intended route
-        const nextUrl = new URL(pathname, origin);
-        const nextUrlHash = nextUrl.hash.slice(1);
+        const nextUrl = parseUrlComponents(pathname);
+        const nextUrlHash = nextUrl.hash;
         const nextPathname = nextUrl.pathname;
 
         const { searchParams, ...extraParams } = params
-        const mergedSearchParams = Object.assign(
-            {},
-            getRawSearchParams(searchParams ?? {}),
-            getRawSearchParams(nextUrl.searchParams)
-        );
+        const mergedSearchParams = {
+            ...urlSearchParams2Record(searchParams ?? {}),
+            ...nextUrl.searchParams
+        }
 
         let urlWasUpdated = false;
 
@@ -200,24 +199,23 @@ export class Router extends Routes {
             );
         });
     };
-
-    /**
-     * 
-     * @param {Location} location 
-     * @returns 
-     */
-    _reconstructPath(location) {
-        const { pathname, search, hash } = location;
-        return `${pathname}${search}${hash}`;
-    }
 }
 
+/**
+ * 
+ * @param {Location} location 
+ * @returns 
+ */
+function combineLocationParts(location) {
+    const { pathname, search, hash } = location;
+    return `${pathname}${search}${hash}`;
+}
 
 /**
  * 
  * @param {URLSearchParams | Object} input 
  */
-function getRawSearchParams(searchParams) {
+export function urlSearchParams2Record(searchParams) {
     if (searchParams instanceof URLSearchParams) {
         return Object.fromEntries(searchParams.entries());
     }
@@ -226,4 +224,40 @@ function getRawSearchParams(searchParams) {
     }
 
     throw new Error('Invalid searchParams: must be URLSearchParams or Object');
+}
+
+/**
+ * 
+ * @param {string} url 
+ * @returns 
+ */
+export function parseUrlComponents(url) {
+    let pathname = url;
+    let searchParams = {};
+    let hash = '';
+
+    const hashIndex = url.indexOf('#');
+    if (hashIndex !== -1) {
+        hash = url.substring(hashIndex + 1);
+        pathname = url.substring(0, hashIndex);
+    }
+
+    const searchIndex = pathname.indexOf('?');
+    if (searchIndex !== -1) {
+        const searchString = pathname.substring(searchIndex + 1);
+        pathname = pathname.substring(0, searchIndex);
+
+        // Post-procesamiento de la cadena de búsqueda con un ciclo for básico
+        const params = searchString.split('&');
+        for (let i = 0; i < params.length; i++) {
+            const param = params[i];
+            const [key, value] = param.split('=');
+
+            if (!key) continue;
+
+            searchParams[decodeURIComponent(key)] = value ? decodeURIComponent(value) : '';
+        }
+    }
+
+    return { pathname, searchParams, hash };
 }
