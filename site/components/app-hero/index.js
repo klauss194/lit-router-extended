@@ -15,11 +15,7 @@ export class AppHero extends LitElement {
           </p>
           <div class="actions">
             <a href="/get-started" class="cta">Get Started</a>
-            <div class="terminal">
-              <span class="icon">terminal</span>
-              <code>npm install lit-router</code>
-              <button class="copy" aria-label="Copy command">content_copy</button>
-            </div>
+            <copy-console content="npm install lit-router"></copy-console>
           </div>
         </div>
       </section>
