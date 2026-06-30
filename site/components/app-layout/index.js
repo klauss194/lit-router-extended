@@ -3,7 +3,7 @@ import { styles } from "./styles.js";
 import "../app-header/index.js";
 import "../app-hero/index.js";
 import "../app-features/index.js";
-import "../app-docs-section/index.js";
+import "../app-docs/index.js";
 import "../app-footer/index.js";
 
 export class AppLayout extends LitElement {
@@ -15,7 +15,7 @@ export class AppLayout extends LitElement {
       <main>
         <app-hero></app-hero>
         <app-features></app-features>
-        <app-docs-section></app-docs-section>
+        <app-docs></app-docs>
       </main>
       <app-footer></app-footer>
     `;

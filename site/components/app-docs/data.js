@@ -1,8 +1,6 @@
 export const sidebarLinks = [
   { href: "#installation", label: "Installation" },
-  { href: "#basic-setup", label: "Basic Setup" },
-  { href: "#route-matching", label: "Route Matching" },
-  { href: "#guards", label: "Guards" },
+  { href: "#advanced-route-matching", label: "Advanced Route Matching" },
 ];
 
 export const CODE_BASIC = [
