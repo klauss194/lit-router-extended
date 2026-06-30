@@ -1,7 +1,9 @@
 import { css } from "lit";
 
 export const styles = css`
-  :host { display: block; }
+  :host { 
+      display: flex;
+  }
 
   .content-section {
     padding-top: var(--spacing-section);

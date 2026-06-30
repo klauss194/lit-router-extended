@@ -1,46 +1,20 @@
-export const sidebarLinks = [
-  { href: "#installation", label: "Installation" },
-  { href: "#advanced-route-matching", label: "Advanced Route Matching" },
+export const sections = [
+  {
+    "id": "installation",
+    "title": "Installation",
+    "order": 1,
+    "html": "<h2>1. Installation</h2>\n<p>Get started by installing the package via your preferred package manager.</p>\n<copy-console content=\"npm install lit-router\"></copy-console>\n<h2>2. Basic Setup</h2>\n<p>Define your router instance within your root component.</p>\n<pre><code class=\"language-typescript\">import { LitElement, html } from &#39;lit&#39;;\nimport { customElement } from &#39;lit/decorators.js&#39;;\nimport { Router } from &#39;lit-router&#39;;\n\n@customElement(&#39;my-app&#39;)\nexport class MyApp extends LitElement {\n  private router = new Router(this, [\n    { path: &#39;/&#39;, render: () =&gt; html`&lt;home-page&gt;&lt;/home-page&gt;` },\n    { path: &#39;/users/:id&#39;, render: ({ id }) =&gt; html`&lt;user-profile id=&quot;${id}&quot;&gt;&lt;/user-profile&gt;` },\n  ]);\n\n  render() {\n    return html`\n      &lt;header&gt;\n        &lt;nav&gt;\n          &lt;a href=&quot;/&quot;&gt;Home&lt;/a&gt;\n          &lt;a href=&quot;/users/123&quot;&gt;Profile&lt;/a&gt;\n        &lt;/nav&gt;\n      &lt;/header&gt;\n      &lt;main&gt;\n        ${this.router.outlet()}\n      &lt;/main&gt;\n    `;\n  }\n}\n</code></pre>\n"
+  },
+  {
+    "id": "advanced-route-matching",
+    "title": "Advanced Route Matching",
+    "order": 2,
+    "html": "<h2>Advanced Route Matching</h2>\n<p>Leverage powerful regex-based matching and custom guard functions to handle complex navigation flows. lit-router allows you to define dynamic segments and catch-all routes with ease, ensuring your application state remains predictable even in the most complex hierarchical structures.</p>\n<h3>Guards</h3>\n<p>Guards are functions that run before a route is activated. Return <code>true</code> to allow navigation, or <code>false</code> / a redirect path to block it.</p>\n<pre><code class=\"language-typescript\">const routes = [\n  {\n    path: &#39;/admin/(.*)&#39;,\n    guard: () =&gt; isAdmin(),\n    render: () =&gt; html`&lt;admin-panel&gt;&lt;/admin-panel&gt;`,\n    children: [\n      { path: &#39;settings&#39;, render: () =&gt; html`&lt;admin-settings&gt;&lt;/admin-settings&gt;` }\n    ]\n  },\n  { path: &#39;*&#39;, render: () =&gt; html`&lt;not-found&gt;&lt;/not-found&gt;` }\n];\n</code></pre>\n<h3>Catch-all Routes</h3>\n<p>The <code>*</code> pattern matches any path not handled by previous routes. Place it last in your route array.</p>\n"
+  },
+  {
+    "id": "guards",
+    "title": "Guards & Hooks",
+    "order": 3,
+    "html": "<h2>Guards</h2>\n<p>Guards are functions that run before a route is activated. They give you fine-grained control over navigation.</p>\n<h3>Auth Guard</h3>\n<p>Block unauthenticated users from accessing protected routes.</p>\n<pre><code class=\"language-typescript\">import { Router, GuardFn } from &#39;lit-router&#39;;\n\nconst authGuard: GuardFn = () =&gt; {\n  if (!isLoggedIn()) {\n    return &#39;/login&#39;;\n  }\n  return true;\n};\n\nconst router = new Router(this, [\n  {\n    path: &#39;/dashboard&#39;,\n    guard: authGuard,\n    render: () =&gt; html`&lt;dashboard-page&gt;&lt;/dashboard-page&gt;`,\n    children: [\n      { path: &#39;settings&#39;, render: () =&gt; html`&lt;settings-page&gt;&lt;/settings-page&gt;` },\n      { path: &#39;billing&#39;, render: () =&gt; html`&lt;billing-page&gt;&lt;/billing-page&gt;` },\n    ]\n  },\n]);\n</code></pre>\n<h2>Hooks</h2>\n<p>Hooks let you run side effects when entering or leaving a route.</p>\n<h3>Data Fetching</h3>\n<p>Load data before rendering a route.</p>\n<pre><code class=\"language-typescript\">const routes = [\n  {\n    path: &#39;/users/:id&#39;,\n    onEnter: async ({ id }) =&gt; {\n      const user = await fetchUser(id);\n      return { user };\n    },\n    render: ({ user }) =&gt; html`&lt;user-profile .user=${user}&gt;&lt;/user-profile&gt;`,\n  },\n];\n</code></pre>\n<h3>Lazy Loading</h3>\n<p>Split your bundle by dynamically importing route components.</p>\n<pre><code class=\"language-typescript\">const routes = [\n  {\n    path: &#39;/heavy&#39;,\n    onEnter: async () =&gt; {\n      await import(&#39;./heavy-page.js&#39;);\n    },\n    render: () =&gt; html`&lt;heavy-page&gt;&lt;/heavy-page&gt;`,\n  },\n];\n</code></pre>\n<h2>Lifecycle Order</h2>\n<p>When navigating between routes, hooks run in this order:</p>\n<ol>\n<li><strong>Leave hook</strong> of the current route</li>\n<li><strong>Guard</strong> of the next route</li>\n<li><strong>Enter hook</strong> of the next route</li>\n<li><strong>Render</strong> the matched component</li>\n</ol>\n<blockquote>\n<p><strong>Note:</strong> If any guard returns <code>false</code>, the navigation is cancelled and no hooks run.</p>\n</blockquote>\n"
+  }
 ];
-
-export const CODE_BASIC = [
-  "import { LitElement, html } from 'lit';",
-  "import { customElement } from 'lit/decorators.js';",
-  "import { Router } from 'lit-router';",
-  "",
-  "@customElement('my-app')",
-  "export class MyApp extends LitElement {",
-  "  private router = new Router(this, [",
-  "    { path: '/', render: () => html`<home-page></home-page>` },",
-  "    { path: '/users/:id', render: ({ id }) => html`<user-profile id=\"${id}\"></user-profile>` },",
-  "  ]);",
-  "",
-  "  render() {",
-  "    return html`",
-  "      <header>",
-  "        <nav>",
-  '          <a href="/">Home</a>',
-  '          <a href="/users/123">Profile</a>',
-  "        </nav>",
-  "      </header>",
-  "      <main>",
-  "        ${this.router.outlet()}",
-  "      </main>",
-  "    `;",
-  "  }",
-  "}"
-].join("\n");
-
-export const CODE_ADVANCED = [
-  "const routes = [",
-  "  {",
-  "    path: '/admin/(.*)',",
-  "    guard: () => isAdmin(),",
-  "    render: () => html`<admin-panel></admin-panel>`,",
-  "    children: [",
-  "      { path: 'settings', render: () => html`<admin-settings></admin-settings>` }",
-  "    ]",
-  "  },",
-  "  { path: '*', render: () => html`<not-found></not-found>` }",
-  "];"
-].join("\n");

@@ -5,6 +5,7 @@ export class CopyConsole extends LitElement {
     :host {
         display: flex;
         align-items: center;
+        width: fit-content;
         gap: 12px;
         background: var(--color-surface-strong);
         border: 1px solid var(--color-hairline-strong);

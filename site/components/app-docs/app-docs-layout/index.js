@@ -2,8 +2,6 @@ import { LitElement, html } from "lit";
 import { map } from "lit/directives/map.js";
 import { styles } from "./styles.js";
 
-import { sidebarLinks } from "../data.js";
-
 export class AppDocsLayout extends LitElement {
   static styles = styles;
   static properties = {
