@@ -1,0 +1,23 @@
+sequenceDiagram
+    autonumber
+    participant ChildHost as Child LitElement
+    participant ChildRoutes as RoutesController (child)
+    participant Outlet as <lit-router-outlet>
+    participant ParentRoutes as RoutesController (parent)
+    participant Navigation as Navigation controller
+
+    Note over ChildRoutes: Child connects and announces itself
+    ChildRoutes->>ChildHost: hostConnected()
+    ChildRoutes->>ChildHost: dispatch lit-routes-connected
+    ChildHost-->>Outlet: event bubbles
+    Outlet->>ParentRoutes: _onRoutesConnected()
+    ParentRoutes-->>ChildRoutes: register child + onDisconnect
+
+    Note over Navigation: Navigation discovers parent scope
+    Navigation->>ChildHost: dispatch lit-routes-acknowledge
+    ChildHost-->>Outlet: event bubbles
+    Outlet->>Navigation: set event.current + event.parent
+    Navigation-->>Navigation: set current/parent
+
+    Note over ParentRoutes: Tail propagation to children
+    ParentRoutes->>ChildRoutes: _propagateNavigation(tailGroup)

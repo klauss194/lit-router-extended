@@ -1,0 +1,41 @@
+graph TD
+    A[Start: Instantiation of RoutesController] --> B(constructor)
+    B --> C(hostConnected)
+    C --> D(addEventListeners)
+    C --> E(dispatchEvent RoutesConnectedEvent)
+
+    F[Navigation: Call to goto] --> G("_gotoInternal(...)")
+    G --> H{Is there pending navigation?}
+    H -- Yes --> I(await _pendingNavigation)
+    H -- No --> J(_performNavigation)
+    I --> J
+
+    J --> K{skipLeaveCallbacks is true?}
+    K -- Yes --> L(Continue without leave callbacks)
+    K -- No --> M(Call ‘leave’ callbacks on current route)
+    M --> N(Call ‘leave’ callbacks on child routes)
+
+    L --> O(isCurrentNavigation?)
+    N --> O
+
+    O -- No --> P(Abort Navigation)
+    O -- Yes --> Q(_getRoute)
+    Q --> R(Sort and search routes)
+    R --> S{Route found?}
+    S -- No --> T(Throw Error - No route)
+    Y -- Yes --> U(Call ‘enter’ callback if it exists)
+    U --> V{Callback enter returns false?}
+    V -- Yes --> P
+    V -- No --> W(Update controller status)
+    W --> X{Current route ends in ‘*’}
+    X -- Yes --> Y(Propagate navigation to child routes)
+    X -- No --> Z(Continue)
+
+    Y --> Z
+    Z --> AA(requestUpdate on host)
+    AA --> BB(dispatchEvent ‘lit-router-location-changed’)
+    BB --> CC(End of Successful Navigation)
+
+    style P fill:#f9d7d7,stroke:#c00,stroke-width:2px,color:#3e3e3e
+    style T fill:#f9d7d7,stroke:#c00,stroke-width:2px,color:#3e3e3e
+    style CC fill:#d4edda,stroke:#155724,stroke-width:2px

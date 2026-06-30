@@ -1,279 +1,174 @@
-# lit-router-extended - actively maintained & used 
-# webcomponents router
-A fork of the original Lit Router (lit-labs router) that was written by Justing ( creator of Lit ) but extended and with modifications inspired by React Router
-First Initial Version
-- Ranking Scorer Instead of URLPattern ( URLPattern seems quite slow & heavy also not supported yet everywhere )
-- Keeps the same philosophy of original @lit-labs/router in terms of rendering & composition
-- added a leave() callback <-- this works as intended BUT KEEP MIND OF  parents & children ( it fires for both since you're leaving two segments )
-- goto() Methods updates the URLbar
-- EMIT global event on each navigation 
-- you can pass params to the goto() method -- >  just to retreive them in the render () method 
--  #,? ,& ( url Data) 
- 
-
-# LIT Router
+# Lit-Router
 
 Intuitive routing for Lit framework,made to be a faster, powerful and flexible route matching.
 
----
+## Overview
 
-## Root Route
+`lit-router` is an advanced, hierarchical, client-side routing library built specifically for the Lit framework. It provides robust React-Router-style route scoring, nested routing, state memory management (`push`/`pop`), route guards (`enter`/`leave`), and reactive controllers for seamless integration into Lit elements.
 
-The root route matches the base path of your application (`/` or empty `string`). It is typically used to render the main landing page or dashboard.
+## Core Architecture
 
-**Example:**
+1. **`Router`**: The root-level reactive controller. It manages `window.history`, intercepts global `popstate` events, and registers itself globally at `globalThis.__lit_router_main`. There should only be one `Router` per application.
+2. **`RoutesController` (`Routes`)**: The base controller used for nested routing. It matches URL fragments, delegates unhandled tail paths to child routers, and renders the matched route using an outlet.
+3. **`Navigation`**: A high-level reactive controller for imperative navigation. It discovers the active routing context via custom DOM events (`lit-routes-acknowledge`) and proxies commands to the root router while preserving context.
+4. **`ReactRouterScorer`**: Calculates match specificity based on static segments, dynamic segments, optionals, and wildcards. It ensures the most specific route always matches first regardless of array order.
 
-- `/` or empty string (` `) with or without spaces will be handled as root path.
+## Defining Routes
 
-
-```js
-const routes = [
-	{ path: ' ', render: () => html`<h1>Home 1</h1>` },
-  { path: '/', render: () => html`<h1>Home 2</h1>` },
-  { path: '', render: () => html`<h1>Home 3</h1>` },
-];
-```
-
-**Note:** All this routes are equal to `'/'` so the router will matches the first one in order of definition, in this case `HOME 1` will be rendered.
-
----
-
-## Static Segments
-
-Static segments are fixed path parts that match exactly. Use them for pages like `/about`, `/contact`, or `/dashboard`.
-
-**Example:**
-
-- `/about` will be handled as static route and matches `/about` or `/about/`. 
+Routes are defined as an array of configuration objects passed to a `Router` or `RoutesController`:
 
 ```javascript
 const routes = [
-  { path: '/about', render: () => html`<h1>About</h1>` },
-  { path: '/about/license', render: () => html`<h1>About</h1>` },
-  { path: '/contact/', render: () => html`<h1>Contact</h1>` },
-  { path: '/dashboard', render: () => html`<h1>Dashboard</h1>` },
+  { name: \"home\", path: \"/\", render: () => html`<h1>Home</h1>` },
+  { name: \"user\", path: \"/user/:id\", render: (ctx) => html`<h1>User ${ctx.params.id}</h1>` },
+  { name: \"optional\", path: \"/post/:id?\", render: (context) => html`<h1>Optional ID ${context.params.id || "None"}</h1>` },
+  { name: \"nested\", path: \"/dashboard/*\", render: () => html`<my-dashboard></my-dashboard>` },
+  { name: \"catchall\", path: \"/*\", render: () => html`<h1>404 Not Found</h1>` }
 ];
 ```
 
----
+### Supported Path Syntaxes
 
-## Dynamic Segments
+- **Static**: `/about`
+- **Dynamic**: `/user/:id`
+- **Optional Segment**: `/user/:id?` or `/route/segment?`
+- **Wildcard**: `/*` or `/folder/*`
+- **Named Wildcard**: `/:restOfPath*`
 
-Dynamic segments allow you to capture values from the URL using parameters. Prefix a segment with `:` to declare a parameter and can use camelCase or snakCase to named params like `:paramName` or `:param_name`.
+> **⚠️ IMPORTANT LLM NOTE regarding `exact`**: The `exact: true` property is explicitly **NOT** supported or implemented by the scorer. Do not suggest or use `exact: true` in route configurations.
 
-**Example:**
+## Rendering Outlets
+
+To render the current matched route, call the controller's `outlet()` method inside the host LitElement's `render` function:
 
 ```javascript
-const routes = [
-  { path: '/user/:userId', render: ({ params }) => html`<h1>User: ${params.userId}</h1>` },
-  { path: '/post/:article_title', render: ({ params }) => html`<h1>Post: ${params.article_title}</h1>` },
-  { path: '/user/:userId/profile', render: ({ params }) => html`<h1>Profile for ${params.userId}</h1>` },
-  { path: '/:postId/sections/:sectionId/edit', render: ({ params }) => html`<h1>Edit Section ${params.sectionId} of Post ${params.postId}</h1>` },
-];
+render() {
+  return html`<main>${this._router.outlet()}</main>`;
+}
 ```
 
-Matches:
+This generates a `<lit-router-outlet>` wrapper that propagates lifecycle events down to nested child routes automatically.
 
-- `/user/:userId`: matches `/user/123`
-- `/post/:article_title`: matches `/post/lit router docs` or `/post/lit-router-docs`.
-- `/user/:userId/profile`: matches `/user/123/profile`
-- `/:postId/sections/:sectionId/edit`: matches `/08372/sections/1253/edit`
+## Contextual Navigation (`Navigation` Controller)
 
----
+Instantiate `new Navigation(this)` controller in your Lit component to access contextual navigation methods.
 
-## Optional params
+### 1. `navigate(pathname, options)`
 
-Optional params let you match routes with optional parammetter at the end of the path. Add a `?` after the parameter name to make it optional.
-
-**Example:**
+Navigates to an absolute or relative path.
 
 ```javascript
-const routes = [
-  { path: '/search/:query?', render: ({ params }) => html`<h1>Search: ${params.query || 'All'}</h1>` },
-  { path: '/dashboard/:widget?/details', render: ({ params }) => html`<h1>Dashboard: ${params.widget || ''} details</h1>` },
-];
-```
-
-Matches 
-
-- `/search/:query?`: matches `/search` and `/search/react`
-- `/dashboard/:widget?/details`: matches `/dashboard/funnel/details` and `/dashboard/details`
-
----
-
-## Optional Segments
-
-Optional segments let you match routes with optional segment at the end of the path. Add a `?` after the parameter name to make it optional.
-
-**Example:**
-
-- `/dashboard/legacy?`: Matches `/dashboard` and `/dashboard/legacy`
-
-```javascript
-const routes = [
-  { path: '/dashboard/legacy?', render: () => html`<h1>Dashboard Legacy</h1>` },
-  { path: '/module/legacy?/link', render: () => html`<h1>Dashboard link</h1>` },
-];
-```
-
-Matches 
-
-- `/dashboard/legacy?`: matches `/dashboard` and `/dashboard/legacy`
-- `/module/legacy?/link`: matches `/module/link` and `/module/legacy/link`
-
----
-
-## Wildcard Segments
-
-Wildcards match any number of path segments. Use `*` for catch-all segments of a route.
-
-**Example:**
-
-- `/post/:postId/*`: Matches `/post/1230/getting start with lit router` 
-- `/landing/articles/*`: Matches `/landing/articles/getting start`
-- `*/license`: Matches `/lit-router/packages/router/license`
-
-```javascript
-const routes = [
-  { path: '/post/:postId/*', render: ({ params }) => html`<h1>Post: ${params.postId}</h1>` },
-  { path: '/landing/articles/*', render: () => html`<h1>Articles</h1>` },
-  { path: '*/license', render: () => html`<h1>License</h1>` }, // Not implemented yet
-];
-```
-
----
-
-## Catch-all
-
-Catch-all routes match any path not handled by other routes. Pathless routes (no `path` property) are useful for layouts or error boundaries.
-
-**Example:**
-
-- `/*` and `*`: Matches all non-defined routes and pass the value as `splat` on params.
-- `/:path*`: Matches all non-defined routes and pass it as named param.
-
-**using default splat**: 
-```javascript
-[
-    { 
-        path: '*', 
-        render({ params }) {
-            return html`<h1>${params.splat}</h1>`
-        }
-    },
-	{ 
-        path: '/*', 
-        render({ params }) {
-            return html`<h1>${params.splat}</h1>`
-        }
-    }
-]
-```
-
-**using named path**: 
-```javascript
-[
-    { 
-        path: '/:catchAll', 
-        render({ params }) {
-            return html`<h1>${params.catchAll}</h1>`
-        }
-    }
-]
-```
-
-**Note:** All this routes are equal to `*` so the router will matches the first one in order of definition.
-
----
-
-
-## Route Configuration Reference
-
-`path`: The route path pattern (static, dynamic, optional, wildcard)
-`render`: The component to render for the route
-`enter`: (optional) A function called before navigation to the route. Return false to block navigation, or perform async checks (e.g., authentication).
-`leave`: (optional) A function called before leaving the route. Return false to block navigation away, or perform cleanup logic.
-
-
-**Example:**
-
-```javascript
-const routes = [
-	{
-		path: "/dashboard",
-		render: () => html`<dashboard-page></dashboard-page>`,
-		enter: () => {
-			// Only allow if user is authenticated
-			if (!isAuthenticated()) return false;
-			return true;
-		},
-		leave: () => {
-			// Confirm before leaving dashboard
-			return window.confirm("Are you sure you want to leave the dashboard?");
-		}
-	}
-];
-```
-
-## Router.goto and Parameter Precedence
-
-The `Router.goto(pathname, params)` method is used to programmatically navigate to a route. It accepts a `pathname` and an optional `params` object, which can include:
-
-- `searchParams`: Query parameters (object or URLSearchParams)
-- `extraParams`: Additional custom parameters
-- `hash`: Hash fragment
-
-### Parameter Precedence:
-
-When navigating, route parameters extracted from the path (e.g., `/user/:id`) always take precedence over any keys in `extraParams` or `searchParams` passed to `Router.goto`. This ensures that the URL structure defines the main context, and extra parameters are only used for additional data.
-
-**Example:**
-
-```javascript
-// Route definition
-// ...
-const router = Router([
-	{ path: '/user/:id', render: ({ params }) => html`<h1>User: ${params.id}</h1>` }
-])
-// ...
-
-// Navigation
-await router.goto('/user/42', { extraParams: { id: 'shouldNotOverride' } });
-// params.id will be '42', not 'shouldNotOverride'
-
-// Passing searchParams
-await router.goto('/user/42', { searchParams: { tab: 'profile' } });
-// params.id will be '42', params.tab will be 'profile'
-```
-
-**General Usage:**
-
-```javascript
-// Navigate to a route with query and hash
-await router.goto('/dashboard', {
-  searchParams: { view: 'stats' },
-  hash: 'section2'
+this.navigator.navigate("/dashboard/settings", {
+  searchParams: { filter: "active" }, // URL query parameters (?filter=active)
+  hash: "section1", // URL hash (#section1)
+  extraParams: { hiddenState: true }, // Hidden state pushed to window.history.state
 });
 ```
 
-## API Reference: Router.goto
-
-**Usage Example:**
+If you provide searchParams in `pathname` as string and `params.searchParams`, the ones in `pathname` takes precedence.
 
 ```javascript
-await router.goto(pathname, params = {})
+// Example: If you provide searchParams in both the pathname string and params.searchParams,
+// the searchParams in the pathname string take precedence.
+
+this.navigator.navigate("/dashboard?filter=archived", {
+  searchParams: { filter: "active", sort: "desc" },
+});
+// Resulting URL: /dashboard?filter=archived&sort=desc
+// 'filter=archived' from the pathname overrides 'filter=active' in searchParams
 ```
+
+**Semantics:**
+
+- `navigate('/path', { searchParams: { x: '1' } })` → sets explicitly
+- `navigate('/path', { searchParams: {} })` → clears explicitly
+- `navigate('/path')` → keeps existing state
+- `navigate('/path', { hash: 'top' })` → sets hash, keeps searchParams
+
+**goto contract:**
 
 - `pathname`: The target path to navigate to (string)
 - `params`: Optional object with:
-	- `searchParams`: Query parameters (object or URLSearchParams)
-	- `extraParams`: Additional custom parameters
-	- `hash`: Hash fragment
+  - `searchParams`: Query parameters (object or URLSearchParams)
+  - `extraParams`: Additional custom parameters
+  - `hash`: Hash fragment
 
-**Returns:**
+### 2. Hierarchical State (`push` and `pop`)
 
-- A Promise that resolves when navigation is complete. otherwise thrown an error.
+`Navigation` supports advanced memory management for sub-routing, allowing a child view to be pushed and later popped while seamlessly restoring the parent's previous URL state.
+
+- **`push(pathname, options)`**: Navigates to a relative child path (the current route must end in a wildcard `*`). It saves the current `searchParams` and `hash` into a hidden `__back_context` state.
+- **`pop(options)`**: Reverts to the parent route. By default (`ignoreSavedState: true`), it discards the saved context. Passing `ignoreSavedState: false` restores the parent's previous search params and hash.
 
 ```javascript
-await router.goto('/profile', { searchParams: { tab: 'settings' }, hash: 'security' });
+// In a child router, push to a nested view
+await this.navigator.push("./settings", { searchParams: { tab: "profile" } });
+
+// Later, pop back to the parent and restore the exact previous state
+await this.navigator.pop({ ignoreSavedState: false });
 ```
+
+### 3. State Accessors
+
+The `Navigation` controller provides getters and setters for the current state:
+
+- `this.navigator.params`: Aggregated URL path parameters from root to leaf.
+- `this.navigator.searchParams`: Current query string parsed into a key-value object. Can be directly mutated via setter to update URL in-place.
+- `this.navigator.hash`: Current hash fragment.
+
+## Enter & Leave Guards (Hooks)
+
+Routes can define `enter` and `leave` hooks to guard navigation. They can be sync or async. Returning `false` immediately aborts the navigation.
+
+```javascript
+{
+  path: '/protected/:id',
+  enter: async (context) => {
+    const hasAccess = await checkAuth(context.params.id);
+    return hasAccess; // false cancels navigation
+  },
+  leave: async (context) => {
+    return confirm(\"You have unsaved changes. Leave?\");
+  },
+  render: (context) => html`<protected-view></protected-view>`
+}
+```
+
+**The `context` object provided to hooks and render functions contains:**
+
+- `params`: Extracted dynamic path parameters.
+- `searchParams`: URL query parameters.
+- `extraParams`: In-memory history state.
+- `hash`: URL hash.
+
+## Hardcoded redirection in `enter` hook
+
+Routes that only redirect should declare their render hook but returning `null` or `nothing`.
+
+```javascript
+{
+  path: '/home',
+  enter: async (context) => {
+    this.navigator.goto("/dashboard")
+    return false;
+  },
+  render: () => null
+}
+```
+
+## Dynamic Routing (Deprecated)
+
+The library supports mutating the route table at runtime:
+
+- `router.addRoute(routeObj, index?)`: Inserts a route and evaluates if it matches the current path immediately.
+- `router.removeRoute(pathOrRoute)`: Removes an existing route.
+- `router.setRoutes(routesArray)`: Entirely replaces the current route table.
+- `router.clearRoutes(keepFallback)`: Wipes all configured routes.
+
+## LLM Developer Guidelines
+
+- Should only exist a declared `Router` instance that wraps the application.
+- Always prefer using the `Navigation` reactive controller (`new Navigation(this)`) over interacting with `Router` directly for navigation commands.
+- Nested routers (`RoutesController`) **must** correspond to a parent route ending with a wildcard (`/*`). The parent router will automatically propagate the remaining URL \"tail\" down to the child.
+- State strictly belonging to the session memory should go in `extraParams`, while state intended to be bookmarkable should go into `searchParams`.
+- Ignore the existence of `exact: true`. It is irrelevant for `lit-router`.
