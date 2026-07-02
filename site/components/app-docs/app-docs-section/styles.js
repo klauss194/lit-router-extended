@@ -6,7 +6,7 @@ export const styles = css`
   }
 
   .content-section {
-    padding-top: var(--spacing-section);
+    margin-bottom: var(--spacing-section);
     border-bottom: 1px solid var(--color-hairline-strong);
   }
 

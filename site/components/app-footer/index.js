@@ -17,7 +17,7 @@ export class AppFooter extends LitElement {
             `)}
           </div>
           <span class="copyright">
-            &copy; 2024 Lit Router. Built for the modern web.
+            &copy; 2026 Lit Router. Built for the modern web.
           </span>
         </div>
       </footer>

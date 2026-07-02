@@ -51,6 +51,20 @@ export const styles = css`
 
   .cta:hover { opacity: 0.9; }
 
+  .icon {
+    display: inline-flex;
+    width: 18px;
+    height: 18px;
+    margin-right: 6px;
+  }
+
+  .icon svg,
+  .icon svg path {
+    width: 18px;
+    height: 18px;
+    fill: currentColor;
+  }
+
   @media (max-width: 767px) {
     .inner { padding: 0 var(--spacing-margin-mobile); }
   }

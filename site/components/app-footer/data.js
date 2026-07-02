@@ -1,6 +1,6 @@
 export const links = [
-  { href: "#", label: "Documentation" },
-  { href: "#", label: "Changelog" },
-  { href: "#", label: "Community" },
-  { href: "#", label: "Privacy" },
+  { href: "https://github.com/klauss194/lit-router-extended", label: "GitHub" },
+  // { href: "#", label: "Changelog" },
+  // { href: "#", label: "Community" },
+  { href: "https://github.com/klauss194/lit-router-extended/blob/main/LICENSE", label: "License" },
 ];

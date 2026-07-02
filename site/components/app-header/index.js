@@ -1,5 +1,8 @@
 import { LitElement, html } from "lit";
+import { unsafeSVG } from "lit/directives/unsafe-svg.js";
+
 import { styles } from "./styles.js";
+import githubIcon from "../../assets/GitHub_Invertocat_White.svg?raw";
 
 export class AppHeader extends LitElement {
   static styles = styles;
@@ -9,7 +12,10 @@ export class AppHeader extends LitElement {
       <nav>
         <div class="inner">
           <a href="/" class="logo">lit-router</a>
-          <a href="/get-started" class="cta">Get Started</a>
+          <a href="https://github.com/klauss194/lit-router-extended" class="cta">
+            <span class="icon">${unsafeSVG(githubIcon)}</span>
+            GitHub
+          </a>
         </div>
       </nav>
     `;

@@ -4,6 +4,23 @@ import { styles } from "./styles.js";
 export class AppHero extends LitElement {
   static styles = styles;
 
+  _onGetStarted = (e) => {
+    e.preventDefault();
+
+    const layout = document.querySelector("app-layout");
+    const docs = layout?.shadowRoot?.querySelector("app-docs");
+    const target = docs?.shadowRoot?.querySelector(
+      'app-docs-section[id="installation"]'
+    );
+    if (!target) return;
+
+    const headerHeight = 80;
+    const top =
+      target.getBoundingClientRect().top + window.scrollY - headerHeight;
+
+    window.scrollTo({ top, behavior: "smooth" });
+  };
+
   render() {
     return html`
       <section class="hero">
@@ -14,7 +31,7 @@ export class AppHero extends LitElement {
             management for the modern web.
           </p>
           <div class="actions">
-            <a href="/get-started" class="cta">Get Started</a>
+            <button @click=${this._onGetStarted} class="cta">Get Started</button>
             <copy-console content="npm install lit-router"></copy-console>
           </div>
         </div>
