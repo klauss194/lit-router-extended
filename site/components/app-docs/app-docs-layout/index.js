@@ -8,13 +8,32 @@ export class AppDocsLayout extends LitElement {
     menuOptions: { type: Object },
   };
 
+  _onAnchorClick(e) {
+    const link = e.target.closest("a");
+    if (!link) return;
+
+    const href = link.getAttribute("href");
+    if (!href || !href.startsWith("#")) return;
+
+    e.preventDefault();
+
+    const id = href.slice(1);
+    const target = this.querySelector(`#${id}`) || this.querySelector(`app-docs-section[id="${id}"]`);
+    if (!target) return;
+
+    const headerHeight = 80;
+    const top = target.getBoundingClientRect().top + window.scrollY - headerHeight;
+
+    window.scrollTo({ top, behavior: "smooth" });
+  }
+
   render() {
     return html`
       <div class="wrapper">
         <aside class="sidebar">
           <nav class="sidebar-nav">
             <h4>On this page</h4>
-            <ul>
+            <ul @click=${this._onAnchorClick}>
               ${map(this.menuOptions, (l) => html`
                 <li><a href="${l.href}">${l.label}</a></li>
               `)}

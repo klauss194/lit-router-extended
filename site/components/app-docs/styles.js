@@ -2,10 +2,10 @@ import { css } from "lit";
 
 export const styles = css`
   h2 {
-    font-size: 36px;
+    font-size: 25px;
     font-weight: 600;
-    line-height: 1.15;
-    letter-spacing: -1.08px;
+    line-height: 1.2;
+    letter-spacing: -1px;
     color: var(--color-ink);
     margin: 0 0 24px;
   }
@@ -93,5 +93,22 @@ export const styles = css`
     padding: 0;
     border-radius: 0;
     color: inherit;
+  }
+
+  pre.mermaid {
+    background: var(--color-surface-container-lowest);
+    border: 1px solid var(--color-hairline-strong);
+    border-radius: var(--rounded-lg);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+    padding: var(--spacing-lg);
+    overflow-x: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  pre.mermaid svg {
+    max-width: 100%;
+    height: auto;
   }
 `;

@@ -45,7 +45,13 @@ export const styles = css`
 
   .sidebar a:hover { color: var(--color-ink); }
 
-  .content { flex: 1; min-width: 0; }
+  .content { 
+      flex: 1; 
+      min-width: 0;
+      display: block;
+      position: relative;
+      max-width: 920px;
+  }
 
   @media (min-width: 768px) {
     .wrapper {
