@@ -111,38 +111,58 @@ export const styles = css`
         max-width: 100%;
         height: auto;
     }
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        font: var(--font-body-sm);
-        color: var(--color-body);
-        margin: 0 0 24px;
-    }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    border: 1px solid var(--color-hairline-strong);
+    border-radius: var(--rounded-xl);
+    overflow: hidden;
+    margin: 0 0 24px;
+  }
 
-    thead {
-        border-bottom: 1px solid var(--color-hairline-strong);
-    }
+  thead tr {
+    background: var(--color-surface-strong);
+    border-bottom: 1px solid var(--color-hairline-strong);
+  }
 
-    th {
-        font: var(--font-body-sm);
-        font-weight: 600;
-        color: var(--color-ink);
-        text-align: left;
-        padding: var(--spacing-xs) var(--spacing-sm);
-        white-space: nowrap;
-    }
+  th {
+    padding: var(--spacing-base);
+    font-family: "Inter", sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.4;
+    color: var(--color-ink);
+  }
 
-    td {
-        padding: var(--spacing-xs) var(--spacing-sm);
-        border-bottom: 1px solid var(--color-hairline);
-        vertical-align: top;
-    }
+  tbody tr {
+    border-bottom: 1px solid var(--color-hairline-strong);
+    transition: background-color 0.15s;
+  }
 
-    tr:last-child td {
-        border-bottom: none;
-    }
+  tbody tr:last-child {
+    border-bottom: none;
+  }
 
-    td code {
-        white-space: nowrap;
-    }
+  tbody tr:hover {
+    background: var(--color-canvas-soft);
+  }
+
+  td {
+    padding: var(--spacing-base);
+    font-family: "Inter", sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--color-on-surface-variant);
+  }
+
+  td:first-child {
+    font-weight: 600;
+    color: var(--color-ink);
+  }
+
+  td code {
+    white-space: nowrap;
+  }
 `;

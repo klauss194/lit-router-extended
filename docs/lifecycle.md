@@ -48,7 +48,7 @@ class App extends LitElement {
 The `enter` callback signature:
 
 ```typescript
-enter?: (context: {
+enter: (context: {
   params: Record<string, string>, // URL path parameters matched by next route
   extraParams: Record<string, any>, // accumulated data from upstream callers (set via `navigate()` or `push()` options)
   searchParams: Record<string, string>,  // next route URL query string
@@ -79,7 +79,7 @@ enter?: (context: {
 The `leave` callback signature:
 
 ```typescript
-leave?: (context: {
+leave: (context: {
   params: Record<string, string>, // URL path parameters matched by current route
   extraParams: Record<string, any>, // accumulated data from upstream callers (set via `navigate()` or `push()` options)
   searchParams: Record<string, string>, // URL query string
