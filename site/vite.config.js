@@ -95,6 +95,7 @@ function docsPlugin() {
 
 export default defineConfig({
   plugins: [docsPlugin()],
+  base: process.env.BASE_URL || "/",
   build: {
     outDir: "dist",
   },
