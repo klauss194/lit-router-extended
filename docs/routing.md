@@ -12,7 +12,49 @@ description: >
 
 lit-router assigns a numeric score to every route at construction time. Routes are sorted descending by score, so the most specific route is tried first — order of definition does not affect matching.
 
-### Scoring in Practice
+### Path Pattern Reference
+
+| Pattern | Matches                             |
+|---|-------------------------------------|
+| `/about` | Static segment, exact literal match |
+| `:param` | Single segment, non-slash chars     |
+| `:param?` | Zero or one optional segment        |
+| `*` | Zero or more trailing segments      |
+| `:param*` | Named capture of tail               |
+
+### Catch-all Routes
+
+A standalone `*` matches any URL not handled by previous routes. Because wildcards score lowest, more specific routes naturally win.
+
+```typescript
+class App extends LitElement {
+  _router = new Router(this, [
+    { path: '/',          render: () => html`<home-page></home-page>` },
+    { path: '/users',     render: () => html`<users-page></users-page>` },
+    { path: '/users/:id', render: ({ params }) =>
+      html`<user-page id=${params.id}></user-page>` },
+    { path: '/admin/*',   render: () => html`<admin-layout></admin-layout>` },
+    { path: '*',          render: () => html`<not-found></not-found>` },
+  ]);
+}
+```
+
+`/users` matches the static route, not the dynamic one. `/users/42` matches the dynamic route. `/admin/settings/users` matches the wildcard prefix. `/unknown` matches the catch-all.
+
+The `*` can appear anywhere in the definition array — the scorer deprioritizes it regardless of position.
+
+### Route Names
+
+Assign a `name` to routes for debugging or for use with the `Navigation` controller's `routeName` property:
+
+```typescript
+{ path: '/dashboard', name: 'dashboard', render: () => html`<dashboard-page></dashboard-page>` }
+
+// In a child component:
+// this.nav.routeName === 'dashboard'
+```
+
+## Scoring in Practice
 
 The scoring formula rewards specificity. Static segments score highest, then dynamic parameters, then wildcards. Below are navigation scenarios that show which route wins and why.
 
@@ -86,45 +128,3 @@ const _router = new Router(this, [
 | `/unknown/deep/path` | `not-found` | Nothing else matches — too many segments for `:page`, no prefix match for static routes. `*` catches everything as last resort |
 
 Tiebreakers when scores are equal: specificity (ratio of static to total segments), then insertion order in the routes array.
-
-### Path Pattern Reference
-
-| Pattern | Matches                             |
-|---|-------------------------------------|
-| `/about` | Static segment, exact literal match |
-| `:param` | Single segment, non-slash chars     |
-| `:param?` | Zero or one optional segment        |
-| `*` | Zero or more trailing segments      |
-| `:param*` | Named capture of tail               |
-
-### Catch-all Routes
-
-A standalone `*` matches any URL not handled by previous routes. Because wildcards score lowest, more specific routes naturally win.
-
-```typescript
-class App extends LitElement {
-  _router = new Router(this, [
-    { path: '/',          render: () => html`<home-page></home-page>` },
-    { path: '/users',     render: () => html`<users-page></users-page>` },
-    { path: '/users/:id', render: ({ params }) =>
-      html`<user-page id=${params.id}></user-page>` },
-    { path: '/admin/*',   render: () => html`<admin-layout></admin-layout>` },
-    { path: '*',          render: () => html`<not-found></not-found>` },
-  ]);
-}
-```
-
-`/users` matches the static route, not the dynamic one. `/users/42` matches the dynamic route. `/admin/settings/users` matches the wildcard prefix. `/unknown` matches the catch-all.
-
-The `*` can appear anywhere in the definition array — the scorer deprioritizes it regardless of position.
-
-### Route Names
-
-Assign a `name` to routes for debugging or for use with the `Navigation` controller's `routeName` property:
-
-```typescript
-{ path: '/dashboard', name: 'dashboard', render: () => html`<dashboard-page></dashboard-page>` }
-
-// In a child component:
-// this.nav.routeName === 'dashboard'
-```

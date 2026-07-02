@@ -8,7 +8,7 @@ description: >
   and the navigation flow order from leave through enter to render.
 ---
 
-## Enter and Leave Callbacks
+## Lifecycle
 
 Every route can declare `enter` and `leave`. Both receive the current route context and an `AbortSignal`. They run sequentially — the next callback waits for the previous one to resolve.
 
@@ -49,13 +49,13 @@ The `enter` callback signature:
 
 ```typescript
 enter?: (context: {
-  params: Record<string, string>,
-  extraParams: Record<string, any>,
-  searchParams: Record<string, string>,
-  hash: string,
-  route: Route,
-  signal: AbortSignal,
-  pathname: string,
+  params: Record<string, string>, // URL path parameters matched by next route
+  extraParams: Record<string, any>, // accumulated data from upstream callers (set via `navigate()` or `push()` options)
+  searchParams: Record<string, string>,  // next route URL query string
+  hash: string, // URL hash fragment (without `#`)
+  signal: AbortSignal, // An abortsignal that can abort the navegation
+  pathname: string, // next pathname
+  route: Route, // the matched `Route` instance
 }) => Promise<boolean | void> | boolean | void
 ```
 
@@ -80,11 +80,11 @@ The `leave` callback signature:
 
 ```typescript
 leave?: (context: {
-  params: Record<string, string>,
-  extraParams: Record<string, any>,
-  searchParams: Record<string, string>,
-  hash: string,
-  signal: AbortSignal,
+  params: Record<string, string>, // URL path parameters matched by current route
+  extraParams: Record<string, any>, // accumulated data from upstream callers (set via `navigate()` or `push()` options)
+  searchParams: Record<string, string>, // URL query string
+  hash: string, // URL hash fragment (without `#`)
+  signal: AbortSignal, // An abortsignal that can abort the navegation
 }) => Promise<boolean | void> | boolean | void
 ```
 
@@ -94,21 +94,16 @@ Leave callbacks fire bottom-up — deepest child first, then its ancestors. If a
 
 The `render` callback fires after `enter` succeeds. It receives the merged route context and returns a Lit `TemplateResult`.
 
+**render signature:**
 ```typescript
 render: (context: {
-  params: Record<string, string>,
-  extraParams: Record<string, any>,
-  searchParams: Record<string, string>,
-  hash: string,
-  route: Route,
-}) => TemplateResult
+  params: Record<string, string>, // URL path parameters matched by this route
+  extraParams: Record<string, any>, // accumulated data from upstream callers (set via `navigate()` or `push()` options)
+  searchParams: Record<string, string>, // current URL query string
+  hash: string, // URL hash fragment (without `#`)
+  route: Route, // the `Route` instance itself
+}) => TemplateResult | nothing | null
 ```
-
-- `params` — URL path parameters matched by this route
-- `extraParams` — accumulated data from upstream callers (set via `navigate()` or `push()` options)
-- `searchParams` — current URL query string
-- `hash` — URL hash fragment (without `#`)
-- `route` — the `Route` instance itself
 
 ### Navigation Order
 
@@ -117,7 +112,7 @@ When navigating from `/editor/1` to `/dashboard`:
 1. **Leave** of `/editor/:id` fires (deepest child → ancestors)
 2. **Enter** of `/dashboard` fires
 3. If any callback returns `false`, navigation is cancelled and the URL does not change
-4. If all callbacks pass, the new route renders and `window.history.pushState` is called
+4. If all callbacks pass, the new route renders and window history is updated
 
 ```mermaid
 sequenceDiagram

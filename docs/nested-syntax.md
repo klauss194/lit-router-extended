@@ -96,29 +96,21 @@ Forgetting the `*` on the parent route prevents the tail group from propagating.
 { path: '/admin/*', render: () => html`<admin-layout></admin-layout>` }
 ```
 
+Named wildcards (`:param*`) are not compatible with nested routing. Use plain `*` for routes that have child `Routes` controllers.
+
 ### Navigation Flow
 
 ```mermaid
-graph TD
-    R[Router: /] --> H[Home]
-    R --> A[/admin/*]
-    A --> G{enter: isAdmin?}
-    G -->|pass| AL[AdminLayout]
-    G -->|false| NG[Navigation cancelled]
-    AL --> AD[/]
-    AL --> AU[/users]
-    AL --> AUI[/users/:id]
-    AL --> AS[/settings]
+sequenceDiagram
+    participant U as User
+    participant R as Router
+    participant AL as AdminLayout
+    participant C as Child Routes
 
-    style R fill:#171717,stroke:#fff,color:#fff
-    style A fill:#0d74ce,stroke:#fff,color:#fff
-    style G fill:#ab6400,stroke:#fff,color:#fff
-    style NG fill:#eb8e90,stroke:#fff,color:#171717
-    style AL fill:#16a34a,stroke:#fff,color:#fff
-    style AD fill:#f0f0f3,stroke:#dcdee0,color:#171717
-    style AU fill:#f0f0f3,stroke:#dcdee0,color:#171717
-    style AUI fill:#f0f0f3,stroke:#dcdee0,color:#171717
-    style AS fill:#f0f0f3,stroke:#dcdee0,color:#171717
+    U->>R: Navigate to /admin/users/42
+    R->>R: Match /admin/*<br/> extract tail: /users/42
+    R->>AL: Render AdminLayout
+    AL->>C: Forward tail /users/42
+    C->>C: Match /users/:id<br/> params.id = 42
+    C-->>U: Render UserDetail
 ```
-
-> **Note:** Named wildcards (`:param*`) are not compatible with nested routing. Use plain `*` for routes that have child `Routes` controllers.

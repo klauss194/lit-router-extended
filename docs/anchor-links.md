@@ -66,7 +66,7 @@ Each click navigates to the target route, updates the URL bar, and scrolls to th
 
 The Router parses `?query` and `#hash` directly from the `href` attribute.
 
-```typescript
+```html
 <a href="/search?q=lit+router">Search results for "lit router"</a>
 <a href="/docs#lifecycle">Jump to lifecycle section</a>
 ```
@@ -77,7 +77,7 @@ The first link calls `router.navigate("/search", { searchParams: { q: "lit route
 
 Add the `router-ignore` attribute to any `<a>` that should bypass the Router. The browser handles the click normally — external navigation, download, or full page reload.
 
-```typescript
+```html
 <!-- External domains -->
 <a router-ignore href="https://github.com/lit-router">View on GitHub</a>
 
@@ -94,7 +94,7 @@ The `target` attribute with `_blank` already bypasses the Router — you don't n
 
 Links that point to `#section` on the current page need `router-ignore`. Without it, the Router intercepts the click, calls `navigate()`, and scrolls to the top — overriding the browser's native scroll-to-anchor behavior.
 
-```typescript
+```html
 <!-- Wrong: Router intercepts, navigates, scrolls to top -->
 <a href="#faq">Frequently Asked Questions</a>
 
