@@ -4,6 +4,17 @@ import { readdir } from "fs/promises";
 import { resolve, dirname } from "path";
 import { marked } from "marked";
 
+marked.use({
+  renderer: {
+    code({ text, lang }) {
+      if (lang === "mermaid") {
+        return `<pre class="mermaid">${text}</pre>\n`;
+      }
+      return false;
+    },
+  },
+});
+
 const docsDir = resolve("../docs");
 const outputFile = resolve("components/app-docs/data.js");
 
@@ -47,7 +58,7 @@ async function generateDataFile() {
     const html = transformBashBlocks(marked.parse(body));
     sections.push({
       id: attributes.id || "",
-      title: attributes.title || "",
+      title: attributes.name || "",
       order: parseInt(attributes.order || "99", 10),
       html,
     });
