@@ -22,10 +22,7 @@ export class CopyConsole extends LitElement {
     }
 
     code {
-        font-family: "JetBrains Mono", monospace;
-        font-size: 13px;
-        font-weight: 400;
-        line-height: 1.5;
+        font: var(--font-code);
         color: var(--color-ink);
     }
 

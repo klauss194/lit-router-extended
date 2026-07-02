@@ -5,7 +5,7 @@ export const styles = css`
 
   .hero {
     position: relative;
-    padding: var(--spacing-section) var(--spacing-margin-mobile) 96px;
+    padding: var(--spacing-section) var(--spacing-base) 96px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -20,44 +20,40 @@ export const styles = css`
   .content { max-width: 768px; }
 
   h1 {
-    font-family: "Inter", sans-serif;
+    font-family: var(--font-family-sans);
     font-size: 32px;
     font-weight: 600;
     line-height: 1.1;
     letter-spacing: -1px;
     color: var(--color-ink);
-    margin: 0 0 32px;
+    margin: 0 0 var(--spacing-xl);
   }
 
   .subtitle {
-    font-size: 16px;
-    font-weight: 400;
-    line-height: 1.5;
-    color: var(--color-on-surface-variant);
+    font: var(--font-body-md);
+    color: var(--color-body);
     max-width: 672px;
-    margin: 0 auto 32px;
+    margin: 0 auto var(--spacing-xl);
   }
 
   .actions {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 16px;
-    padding-top: 16px;
+    gap: var(--spacing-base);
+    padding-top: var(--spacing-base);
   }
 
   .cta {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 12px 32px;
+    padding: 12px var(--spacing-xl);
     background: var(--color-primary);
     color: var(--color-on-primary);
-    font-size: 14px;
-    font-weight: 500;
-    line-height: 1.4;
+    font: var(--font-button);
     border: none;
-    border-radius: var(--rounded-full);
+    border-radius: var(--rounded-pill);
     cursor: pointer;
     text-decoration: none;
     white-space: nowrap;
@@ -68,13 +64,12 @@ export const styles = css`
 
   @media (min-width: 768px) {
     .hero {
-      padding-left: var(--spacing-gutter);
-      padding-right: var(--spacing-gutter);
+      padding-left: var(--spacing-lg);
+      padding-right: var(--spacing-lg);
     }
 
     h1 {
-      font-size: 64px;
-      line-height: 1.05;
+      font: var(--font-display-mega);
       letter-spacing: -1.92px;
     }
 

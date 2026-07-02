@@ -18,16 +18,14 @@ export const styles = css`
     display: flex;
     justify-content: space-between;
     align-items: center;
-    height: 64px;
-    padding: 0 var(--spacing-gutter);
+    height: var(--header-height);
+    padding: 0 var(--spacing-lg);
     max-width: var(--max-width);
     margin: 0 auto;
   }
 
   .logo {
-    font-size: 18px;
-    font-weight: 600;
-    line-height: 1.4;
+    font: var(--font-title-md);
     color: var(--color-ink);
     text-decoration: none;
   }
@@ -36,14 +34,13 @@ export const styles = css`
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    gap: var(--spacing-xs);
     padding: 8px 24px;
     background: var(--color-primary);
     color: var(--color-on-primary);
-    font-size: 14px;
-    font-weight: 500;
-    line-height: 1.4;
+    font: var(--font-nav);
     border: none;
-    border-radius: var(--rounded-full);
+    border-radius: var(--rounded-pill);
     cursor: pointer;
     text-decoration: none;
     transition: opacity 0.15s;
@@ -55,7 +52,6 @@ export const styles = css`
     display: inline-flex;
     width: 18px;
     height: 18px;
-    margin-right: 6px;
   }
 
   .icon svg,
@@ -66,6 +62,6 @@ export const styles = css`
   }
 
   @media (max-width: 767px) {
-    .inner { padding: 0 var(--spacing-margin-mobile); }
+    .inner { padding: 0 var(--spacing-base); }
   }
 `;

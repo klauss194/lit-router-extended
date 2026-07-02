@@ -5,7 +5,7 @@ export const styles = css`
 
   footer {
     background: var(--color-canvas-soft);
-    padding: var(--spacing-section) var(--spacing-gutter);
+    padding: var(--spacing-section) var(--spacing-lg);
     margin-top: var(--spacing-section);
     border-top: 1px solid var(--color-hairline-strong);
   }
@@ -20,30 +20,26 @@ export const styles = css`
   }
 
   .brand {
-    font-size: 18px;
-    font-weight: 600;
-    line-height: 1.4;
+    font: var(--font-title-md);
     color: var(--color-ink);
   }
 
-  .links { display: flex; align-items: center; gap: 24px; }
+  .links { display: flex; align-items: center; gap: var(--spacing-lg); }
 
   .links a {
-    font-size: 14px;
-    font-weight: 400;
-    line-height: 1.5;
-    color: var(--color-on-surface-variant);
+    font: var(--font-body-sm);
+    color: var(--color-body);
     text-decoration: none;
     transition: color 0.15s;
   }
 
-  .links a:hover { color: var(--color-secondary); }
+  .links a:hover {
+    color: var(--color-text-link);
+  }
 
   .copyright {
-    font-size: 14px;
-    font-weight: 400;
-    line-height: 1.5;
-    color: var(--color-on-surface-variant);
+    font: var(--font-body-sm);
+    color: var(--color-body);
   }
 
   @media (min-width: 768px) {
@@ -52,8 +48,8 @@ export const styles = css`
 
   @media (max-width: 767px) {
     footer {
-      padding-left: var(--spacing-margin-mobile);
-      padding-right: var(--spacing-margin-mobile);
+      padding-left: var(--spacing-base);
+      padding-right: var(--spacing-base);
     }
   }
 `;

@@ -4,7 +4,7 @@ export const styles = css`
   :host { display: block; }
 
   .section {
-    padding: var(--spacing-section) var(--spacing-margin-mobile);
+    padding: var(--spacing-section) var(--spacing-base);
     max-width: var(--max-width);
     margin: 0 auto;
   }
@@ -16,7 +16,7 @@ export const styles = css`
   }
 
   .card {
-    background: var(--color-surface-container-lowest);
+    background: var(--color-surface-card);
     border: 1px solid var(--color-hairline-strong);
     border-radius: var(--rounded-xl);
     padding: var(--spacing-lg);
@@ -35,7 +35,7 @@ export const styles = css`
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 24px;
+    margin-bottom: var(--spacing-lg);
     font-family: "Material Symbols Outlined";
     font-size: 24px;
     color: var(--color-ink);
@@ -43,25 +43,21 @@ export const styles = css`
   }
 
   .card h3 {
-    font-size: 18px;
-    font-weight: 600;
-    line-height: 1.4;
+    font: var(--font-title-md);
     color: var(--color-ink);
-    margin: 0 0 12px;
+    margin: 0 0 var(--spacing-sm);
   }
 
   .card p {
-    font-size: 16px;
-    font-weight: 400;
-    line-height: 1.5;
-    color: var(--color-on-surface-variant);
+    font: var(--font-body-md);
+    color: var(--color-body);
     margin: 0;
   }
 
   @media (min-width: 768px) {
     .section {
-      padding-left: var(--spacing-gutter);
-      padding-right: var(--spacing-gutter);
+      padding-left: var(--spacing-lg);
+      padding-right: var(--spacing-lg);
     }
 
     .grid {

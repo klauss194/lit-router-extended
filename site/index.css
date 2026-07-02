@@ -1,5 +1,95 @@
 @import "highlight.js/styles/atom-one-dark.css";
 
+/* ── Design Tokens from DESIGN.md ── */
+:root {
+  /* Colors — Brand & Accent */
+  --color-primary: #000000;
+  --color-primary-active: #1a1a1a;
+  --color-text-link: #0d74ce;
+  --color-text-link-secondary: #476cff;
+  --color-ink: #171717;
+  --color-body: #60646c;
+  --color-body-strong: #171717;
+  --color-muted: #999999;
+  --color-muted-soft: #cccccc;
+
+  /* Colors — Surface */
+  --color-canvas: #ffffff;
+  --color-canvas-soft: #fafafa;
+  --color-surface-card: #ffffff;
+  --color-surface-strong: #f0f0f3;
+  --color-surface-dark: #171717;
+  --color-surface-dark-elevated: #1a1a1a;
+
+  /* Colors — Text on surfaces */
+  --color-on-primary: #ffffff;
+  --color-on-dark: #ffffff;
+  --color-on-dark-soft: #b0b4ba;
+
+  /* Colors — Hairlines */
+  --color-hairline: #f0f0f3;
+  --color-hairline-soft: #f5f5f7;
+  --color-hairline-strong: #dcdee0;
+
+  /* Colors — Atmospheric */
+  --color-gradient-sky-light: #cfe7ff;
+  --color-gradient-sky-mid: #a8c8e8;
+
+  /* Colors — Semantic */
+  --color-accent-warning: #ab6400;
+  --color-accent-preview: #8145b5;
+  --color-accent-link-bright: #47c2ff;
+  --color-semantic-error: #eb8e90;
+  --color-semantic-success: #16a34a;
+
+  --color-code-background: rgb(40, 44, 52);
+  /* Typography — Font families */
+  --font-family-sans: "Inter", -apple-system, system-ui, sans-serif;
+  --font-family-mono: "JetBrains Mono", "Fira Code", monospace;
+
+  /* Typography — Shorthands */
+  --font-display-mega: 600 64px/1.05 var(--font-family-sans);
+  --font-display-xl: 600 48px/1.1 var(--font-family-sans);
+  --font-display-lg: 600 36px/1.15 var(--font-family-sans);
+  --font-display-md: 600 28px/1.2 var(--font-family-sans);
+  --font-display-sm: 600 22px/1.25 var(--font-family-sans);
+  --font-title-md: 600 18px/1.4 var(--font-family-sans);
+  --font-title-sm: 600 16px/1.4 var(--font-family-sans);
+  --font-body-md: 400 16px/1.5 var(--font-family-sans);
+  --font-body-sm: 400 14px/1.5 var(--font-family-sans);
+  --font-caption: 400 13px/1.4 var(--font-family-sans);
+  --font-caption-uppercase: 600 11px/1.4 var(--font-family-sans);
+  --font-code: 400 13px/1.5 var(--font-family-mono);
+  --font-button: 500 14px/1.0 var(--font-family-sans);
+  --font-nav: 500 14px/1.4 var(--font-family-sans);
+
+  /* Border Radius */
+  --rounded-none: 0px;
+  --rounded-xs: 4px;
+  --rounded-sm: 6px;
+  --rounded-md: 8px;
+  --rounded-lg: 12px;
+  --rounded-xl: 16px;
+  --rounded-xxl: 24px;
+  --rounded-pill: 9999px;
+
+  /* Spacing (4px base) */
+  --spacing-xxs: 4px;
+  --spacing-xs: 8px;
+  --spacing-sm: 12px;
+  --spacing-base: 16px;
+  --spacing-md: 20px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-xxl: 48px;
+  --spacing-section: 96px;
+
+  /* Layout */
+  --max-width: 1200px;
+  --header-height: 64px;
+}
+
+/* ── Global Reset ── */
 *,
 *::before,
 *::after {
@@ -9,5 +99,9 @@
 }
 
 body {
-  font-family: "Inter", sans-serif;
+  font-family: var(--font-family-sans);
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }

@@ -1,12 +1,10 @@
 import { css } from "lit";
 
 export const styles = css`
-  :host { 
-      display: block;
-  }
+  :host { display: block; }
 
   .content-section {
-    margin-bottom: var(--spacing-section);
+    padding-top: var(--spacing-section);
     border-bottom: 1px solid var(--color-hairline-strong);
   }
 

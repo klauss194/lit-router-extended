@@ -6,7 +6,7 @@ export const styles = css`
   .wrapper {
     max-width: var(--max-width);
     margin: 0 auto;
-    padding: 0 var(--spacing-margin-mobile);
+    padding: 0 var(--spacing-base);
     display: flex;
     flex-direction: column;
     gap: var(--spacing-xxl);
@@ -21,41 +21,31 @@ export const styles = css`
   .sidebar-nav { position: sticky; top: 96px; }
 
   .sidebar h4 {
-    font-size: 11px;
-    font-weight: 600;
-    line-height: 1.4;
-    letter-spacing: 0.88px;
-    color: var(--color-on-surface-variant);
+    font: var(--font-caption-uppercase);
+    color: var(--color-body);
     text-transform: uppercase;
-    margin: 0 0 16px;
+    letter-spacing: 0.88px;
+    margin: 0 0 var(--spacing-base);
   }
 
   .sidebar ul { list-style: none; padding: 0; margin: 0; }
 
-  .sidebar li { margin-bottom: 12px; }
+  .sidebar li { margin-bottom: var(--spacing-sm); }
 
   .sidebar a {
-    font-size: 14px;
-    font-weight: 500;
-    line-height: 1.4;
-    color: var(--color-on-surface-variant);
+    font: var(--font-nav);
+    color: var(--color-body);
     text-decoration: none;
     transition: color 0.15s;
   }
 
   .sidebar a:hover { color: var(--color-ink); }
 
-  .content { 
-      flex: 1; 
-      min-width: 0;
-      display: block;
-      position: relative;
-      max-width: 920px;
-  }
+  .content { flex: 1; min-width: 0; }
 
   @media (min-width: 768px) {
     .wrapper {
-      padding: 0 var(--spacing-gutter);
+      padding: 0 var(--spacing-lg);
       flex-direction: row;
     }
 
