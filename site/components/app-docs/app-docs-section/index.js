@@ -2,11 +2,13 @@ import { LitElement, html } from "lit";
 import hljs from "highlight.js/lib/core";
 import typescript from "highlight.js/lib/languages/typescript";
 import javascript from "highlight.js/lib/languages/javascript";
+import htmllang from "highlight.js/lib/languages/xml";
 
 import { styles } from "./styles.js";
 
 hljs.registerLanguage("typescript", typescript);
 hljs.registerLanguage("javascript", javascript);
+hljs.registerLanguage("html", htmllang);
 
 export class AppContentSection extends LitElement {
   static styles = styles;
