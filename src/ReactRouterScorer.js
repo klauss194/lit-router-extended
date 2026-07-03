@@ -7,21 +7,21 @@ export class ReactRouterScorer {
   constructor() {
     // Enhanced scoring system based on React Router's approach
     this.SEGMENT_WEIGHTS = {
-      STATIC: 10,           // Static segments get highest priority
-      DYNAMIC: 5,           // Dynamic parameters get medium priority
-      OPTIONAL_DYNAMIC: 3,  // Optional parameters get lower priority
-      WILDCARD: 1,          // Single wildcards get low priority
-      CATCH_ALL: 0.5        // Catch-all wildcards get lowest priority
+      STATIC: 10, // Static segments get highest priority
+      DYNAMIC: 5, // Dynamic parameters get medium priority
+      OPTIONAL_DYNAMIC: 3, // Optional parameters get lower priority
+      WILDCARD: 1, // Single wildcards get low priority
+      CATCH_ALL: 0.5, // Catch-all wildcards get lowest priority
     };
 
     // Route ranking factors (in order of importance)
     this.RANKING_FACTORS = {
-      STATIC_SEGMENTS: 1000,    // Number of static segments (most important)
-      DYNAMIC_SEGMENTS: 100,    // Number of dynamic segments
-      OPTIONAL_SEGMENTS: 10,    // Number of optional segments
-      WILDCARD_PENALTY: -50,    // Penalty for wildcards
-      DEPTH_BONUS: 1,           // Bonus for route depth
-      SPECIFICITY_BONUS: 0.1    // Bonus for overall specificity
+      STATIC_SEGMENTS: 1000, // Number of static segments (most important)
+      DYNAMIC_SEGMENTS: 100, // Number of dynamic segments
+      OPTIONAL_SEGMENTS: 10, // Number of optional segments
+      WILDCARD_PENALTY: -50, // Penalty for wildcards
+      DEPTH_BONUS: 1, // Bonus for route depth
+      SPECIFICITY_BONUS: 0.1, // Bonus for overall specificity
     };
   }
 
@@ -31,16 +31,22 @@ export class ReactRouterScorer {
    * @returns {Object} - Detailed scoring breakdown and final score
    */
   scoreRoute(path) {
-    if (!path || path === '/') {
+    if (!path || path === "/") {
       return {
         score: this.RANKING_FACTORS.STATIC_SEGMENTS, // Root path gets high static score
-        breakdown: { staticSegments: 1, dynamicSegments: 0, optionalSegments: 0, wildcards: 0, depth: 1 },
-        specificity: 1
+        breakdown: {
+          staticSegments: 1,
+          dynamicSegments: 0,
+          optionalSegments: 0,
+          wildcards: 0,
+          depth: 1,
+        },
+        specificity: 1,
       };
     }
 
     // Split path into segments, filtering out empty strings
-    const segments = path.split('/').filter(Boolean);
+    const segments = path.split("/").filter(Boolean);
 
     // Count different segment types for React Router-style ranking
     const breakdown = {
@@ -48,16 +54,16 @@ export class ReactRouterScorer {
       dynamicSegments: 0,
       optionalSegments: 0,
       wildcards: 0,
-      depth: segments.length
+      depth: segments.length,
     };
     for (let i = 0; i < segments.length; i++) {
       const segment = segments[i];
-      if (segment === '*' || segment === '**') {
+      if (segment === "*") {
         breakdown.wildcards++;
-      } else if (segment.startsWith(':')) {
-        if (segment.endsWith('?')) {
+      } else if (segment.startsWith(":")) {
+        if (segment.endsWith("?")) {
           breakdown.optionalSegments++;
-        } else if (segment.endsWith('*')) {
+        } else if (segment.endsWith("*")) {
           breakdown.wildcards++;
         } else {
           breakdown.dynamicSegments++;
@@ -77,7 +83,8 @@ export class ReactRouterScorer {
     score += breakdown.dynamicSegments * this.RANKING_FACTORS.DYNAMIC_SEGMENTS;
 
     // Optional segments add some value
-    score += breakdown.optionalSegments * this.RANKING_FACTORS.OPTIONAL_SEGMENTS;
+    score +=
+      breakdown.optionalSegments * this.RANKING_FACTORS.OPTIONAL_SEGMENTS;
 
     // Wildcards are penalized
     score += breakdown.wildcards * this.RANKING_FACTORS.WILDCARD_PENALTY;
@@ -86,14 +93,19 @@ export class ReactRouterScorer {
     score += breakdown.depth * this.RANKING_FACTORS.DEPTH_BONUS;
 
     // Calculate specificity (ratio of static to total segments)
-    const totalSegments = breakdown.staticSegments + breakdown.dynamicSegments + breakdown.optionalSegments + breakdown.wildcards;
-    const specificity = totalSegments > 0 ? breakdown.staticSegments / totalSegments : 0;
+    const totalSegments =
+      breakdown.staticSegments +
+      breakdown.dynamicSegments +
+      breakdown.optionalSegments +
+      breakdown.wildcards;
+    const specificity =
+      totalSegments > 0 ? breakdown.staticSegments / totalSegments : 0;
     score += specificity * this.RANKING_FACTORS.SPECIFICITY_BONUS;
 
     return {
       score,
       breakdown,
-      specificity
+      specificity,
     };
   }
 
@@ -103,55 +115,56 @@ export class ReactRouterScorer {
    * @returns {Object} - Compiled route info
    */
   compileRoute(path) {
-    const segments = path.split('/').filter(Boolean);
+    const segments = path.split("/").filter(Boolean);
     const params = [];
     // Make leading slash optional for child routes
-    let regexPattern = '^/?';
+    let regexPattern = "^/?";
 
     for (let index = 0; index < segments.length; index++) {
       const segment = segments[index];
 
       if (index > 0) {
-        regexPattern += '/';
+        regexPattern += "/";
       }
 
-      if (segment === '*') {
+      if (segment === "*") {
         // Wildcard - match single segment or more
-        regexPattern += '(.*)';
-        params.push('0'); // Use numeric key for wildcard groups to match getTailGroup
-      } else if (segment === '**') {
-        // Deep wildcard - match multiple segments
-        regexPattern += '(.*)';
-        params.push('**');
-      } else if (segment.startsWith(':')) {
+
+        if (index > 0) {
+          regexPattern = regexPattern.substring(0, regexPattern.length - 1);
+        }
+
+        params.push("0"); // Use numeric key for wildcard groups to match getTailGroup
+        regexPattern += "(\/?|\/.*)";
+      } else if (segment.startsWith(":")) {
         // Dynamic parameter
-        const paramName = segment.slice(1).replace(/[\W_]/g, '');
-        const isOptional = segment.endsWith('?');
-        const isWildcard = segment.endsWith('*');
+        const paramName = segment.slice(1).replace(/[\W_]/g, "");
+        const isOptional = segment.endsWith("?");
+        const isWildcard = segment.endsWith("*");
 
         if (isOptional) {
           if (index > 0) {
-            regexPattern += '?';
+            regexPattern += "?";
           }
 
-          regexPattern += '([^/]*?)';
+          regexPattern += "([^/]*?)";
         } else if (isWildcard) {
-          regexPattern += '([^/].+)';
+          regexPattern += "([^/].+)";
         } else {
-          regexPattern += '([^/]+)';
+          regexPattern += "([^/]+)";
         }
 
         params.push(paramName);
       } else {
         // Static segment - escape special regex characters
-        const escapedSegment = segment.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const escapedSegment = segment.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
-        if (segment.endsWith('?')) {
+        if (segment.endsWith("?")) {
           if (index > 0) {
-            regexPattern += '?';
+            regexPattern += "?";
           }
           regexPattern += `(${escapedSegment.slice(0, -2)})?`;
-        } else if (segment.endsWith('*')) {
+        } else if (segment.endsWith("*")) {
           regexPattern += `(${escapedSegment.slice(0, -2)}.+)`;
         } else {
           regexPattern += escapedSegment;
@@ -160,12 +173,12 @@ export class ReactRouterScorer {
     }
 
     // Handle optional trailing slash and end of string
-    regexPattern += '/?$';
+    regexPattern += "/?$";
 
     const compiled = {
       regex: new RegExp(regexPattern),
       params,
-      segments
+      segments,
     };
 
     return compiled;
@@ -178,22 +191,28 @@ export class ReactRouterScorer {
    * @returns {Object|null} - Match result with extracted params or null
    */
   matchPathAdvanced(pathname, compiledRule) {
-    // Normalize pathname
-    const normalizedPath = pathname.endsWith('/') && pathname !== '/'
-      ? pathname.slice(0, -1)
-      : pathname;
-
-    const match = compiledRule.regex.exec(normalizedPath);
+    // Trailing-slash normalisation was previously done here with a local variable:
+    //
+    //   const normalizedPath = pathname.endsWith("/") && pathname !== "/"
+    //       ? pathname.slice(0, -1)
+    //       : pathname;
+    //
+    // It was removed because canonicalizePath() in util/url.js now strips
+    // trailing slashes at the entry boundary (parseUrl / resolveUrl), so every
+    // pathname that reaches this method is already canonical. Keeping a second
+    // normalisation here would be redundant and misleading — it implied that
+    // pathnames could still be dirty at this point, which they no longer can.
+    const match = compiledRule.regex.exec(pathname);
 
     if (!match) return null;
 
     // Extract parameters
     const params = {};
     compiledRule.params.forEach((paramName, index) => {
-      if (paramName === '0' || /^\d+$/.test(paramName)) {
+      if (paramName === "0" || /^\d+$/.test(paramName)) {
         // Numeric keys for wildcard groups
         params[paramName] = match[index + 1];
-      } else if (paramName !== '*' && paramName !== '**') {
+      } else if (paramName !== "*") {
         params[paramName] = match[index + 1];
       }
     });
@@ -202,7 +221,7 @@ export class ReactRouterScorer {
       matched: true,
       params,
       fullMatch: match[0],
-      segments: match.slice(1)
+      segments: match.slice(1),
     };
   }
 }

@@ -1,0 +1,26 @@
+{
+  "name": "lit-router-extended",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "keywords": [
+    "lit",
+    "router",
+    "lit-router",
+    "lit-router-extended"
+  ],
+  "homepage": "https://github.com/klauss194/lit-router-extended#readme",
+  "bugs": {
+    "url": "https://github.com/klauss194/lit-router-extended/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/klauss194/lit-router-extended.git"
+  },
+  "license": "BSD 3-Clause License",
+  "author": ""
+}
