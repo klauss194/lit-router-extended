@@ -1,7 +1,7 @@
 ---
 id: anchor-links
 name: Anchor Links
-order: 2
+order: 9
 description: >
   How lit-router handles anchor (<a>) clicks: automatic interception via
   capture-phase listener on window, conditions for interception, router-ignore
