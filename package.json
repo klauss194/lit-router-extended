@@ -4,8 +4,25 @@
   "description": "",
   "type": "module",
   "main": "src/index.js",
+  "module": "src/index.js",
   "exports": {
     ".": "./src/index.js"
+  },
+  "scripts": {
+    "test": "wtr",
+    "test:dev": "wtr --watch"
+  },
+  "devDependencies": {
+    "@esm-bundle/chai": "^4.3.4-fix.0",
+    "@open-wc/lit-helpers": "^0.7.0",
+    "@open-wc/testing": "^4.0.0",
+    "@web/test-runner": "^0.20.2",
+    "chai-as-promised": "^8.0.2",
+    "lit": "^3.3.3",
+    "playwright": "^1.61.1"
+  },
+  "peerDependencies": {
+    "lit": "^3.3.3"
   },
   "keywords": [
     "lit",

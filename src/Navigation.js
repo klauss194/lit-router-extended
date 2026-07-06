@@ -307,7 +307,7 @@ export class Navigation {
     const hasChildren =
       this.#current._children.size > 0 || this.#current.state?.hasTail;
 
-    return hasChildren && !Boolean(this.#current.state?.tailGroup);
+    return  (!!this.#current.state?.hasTail && hasChildren) || !hasChildren;
   }
 
   /**

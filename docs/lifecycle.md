@@ -88,7 +88,7 @@ leave: (context: {
 }) => Promise<boolean | void> | boolean | void
 ```
 
-Leave callbacks fire bottom-up — deepest child first, then its ancestors. If any returns `false`, the navigation is cancelled and no further leave callbacks run.
+Leave callbacks fire top-down — deepest evaluation. If any returns `false`, the navigation is cancelled and no further leave callbacks run.
 
 ### Render Callback
 
