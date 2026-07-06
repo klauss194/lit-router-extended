@@ -1,8 +1,11 @@
 ---
 id: getting-started
 name: Getting Started
-order: 9
-description: Getting started example
+order: 2
+description: >
+  Step-by-step tutorial covering Router setup, programmatic navigation with
+  the Navigation controller, nested routing with Routes, and building a
+  route-driven modal with push/pop.
 ---
 
 ## Getting Started
