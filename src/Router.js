@@ -266,7 +266,7 @@ export class Router extends Routes {
       pathname: nextUrl.pathname,
       params: context.params,
       searchParams: context.searchParams,
-      hash: context.hash,
+      hash: nextUrlHash,
     };
 
     dispatchLocationChanged({
@@ -274,7 +274,7 @@ export class Router extends Routes {
       params: context.params,
       extraParams: context.extraParams,
       searchParams: context.searchParams,
-      hash: context.hash,
+      hash: nextUrlHash,
     });
 
     this.__emitChanges({ eventName: "location-changed", prev, next });
