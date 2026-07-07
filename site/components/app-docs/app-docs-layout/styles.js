@@ -20,21 +20,25 @@ export const styles = css`
 
   .sidebar-nav { position: sticky; top: 96px; }
 
+  .sidebar-group { margin-bottom: var(--spacing-lg); }
+
+  .sidebar-group:last-child { margin-bottom: 0; }
+
   .sidebar h4 {
     font: var(--font-caption-uppercase);
     color: var(--color-body);
     text-transform: uppercase;
     letter-spacing: 0.88px;
-    margin: 0 0 var(--spacing-base);
+    margin: 0 0 var(--spacing-xs);
   }
 
   .sidebar ul { list-style: none; padding: 0; margin: 0; }
 
-  .sidebar li { margin-bottom: var(--spacing-sm); }
+  .sidebar li { margin-bottom: var(--spacing-xs); }
 
   .sidebar a {
     font: var(--font-nav);
-    color: var(--color-body);
+    color: var(--color-body-strong);
     text-decoration: none;
     transition: color 0.15s;
   }
