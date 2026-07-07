@@ -10,7 +10,7 @@ export class AppFooter extends LitElement {
     return html`
       <footer>
         <div class="inner">
-          <span class="brand">lit-router</span>
+          <span class="brand">lit-router-extended</span>
           <div class="links">
             ${repeat(links, (l) => l.href, (l) => html`
               <a href="${l.href}">${l.label}</a>
