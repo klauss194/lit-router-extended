@@ -4,7 +4,7 @@ export const styles = css`
   :host { display: block; }
 
   .content-section {
-    padding-top: var(--spacing-section);
+    padding-bottom: var(--spacing-section);
     border-bottom: 1px solid var(--color-hairline-strong);
   }
 

@@ -18,11 +18,14 @@ export class AppDocsLayout extends LitElement {
     e.preventDefault();
 
     const id = href.slice(1);
-    const target = this.querySelector(`#${id}`) || this.querySelector(`app-docs-section[id="${id}"]`);
+    const target =
+      this.querySelector(`#${id}`) ||
+      this.querySelector(`app-docs-section[id="${id}"]`);
     if (!target) return;
 
     const headerHeight = 80;
-    const top = target.getBoundingClientRect().top + window.scrollY - headerHeight;
+    const top =
+      target.getBoundingClientRect().top + window.scrollY - headerHeight;
 
     window.scrollTo({ top, behavior: "smooth" });
   }
@@ -31,13 +34,23 @@ export class AppDocsLayout extends LitElement {
     return html`
       <div class="wrapper">
         <aside class="sidebar">
-          <nav class="sidebar-nav">
-            <h4>On this page</h4>
-            <ul @click=${this._onAnchorClick}>
-              ${map(this.menuOptions, (l) => html`
-                <li><a href="${l.href}">${l.label}</a></li>
-              `)}
-            </ul>
+          <nav class="sidebar-nav" @click=${this._onAnchorClick}>
+            ${map(
+              this.menuOptions,
+              (group) => html`
+                <div class="sidebar-group">
+                  <h4>${group.label}</h4>
+                  <ul>
+                    ${map(
+                      group.items,
+                      (item) => html`
+                        <li><a href="${item.href}">${item.label}</a></li>
+                      `,
+                    )}
+                  </ul>
+                </div>
+              `,
+            )}
           </nav>
         </aside>
         <div class="content">
