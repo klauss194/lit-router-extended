@@ -11,7 +11,7 @@ export class AppHeader extends LitElement {
     return html`
       <nav>
         <div class="inner">
-          <a href="/" class="logo">lit-router</a>
+          <a href="/" class="logo">lit-router-extended</a>
           <a href="https://github.com/klauss194/lit-router-extended" class="cta">
             <span class="icon">${unsafeSVG(githubIcon)}</span>
             GitHub
