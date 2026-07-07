@@ -32,7 +32,7 @@ export class AppHero extends LitElement {
           </p>
           <div class="actions">
             <button @click=${this._onGetStarted} class="cta">Get Started</button>
-            <copy-console content="npm install lit-router"></copy-console>
+            <copy-console content="npm install lit-router-extended"></copy-console>
           </div>
         </div>
       </section>

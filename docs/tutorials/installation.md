@@ -9,7 +9,7 @@ order: 1
 Install lit-router via npm. The package has no external dependencies.
 
 ```bash
-npm install lit-router
+npm install lit-router-extended
 ```
 
 ## Basic Setup
