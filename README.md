@@ -6,6 +6,10 @@ Intuitive routing for Lit framework,made to be a faster, powerful and flexible r
 
 `lit-router` is an advanced, hierarchical, client-side routing library built specifically for the Lit framework. It provides robust React-Router-style route scoring, nested routing, state memory management (`push`/`pop`), route guards (`enter`/`leave`), and reactive controllers for seamless integration into Lit elements.
 
+## Expanded Documentation
+
+Check the [docs/](./docs/) folder for detailed documentation on the router; you can also let your AI agent figure out how to use the router by discovering the files in that folder as if they were ai-skills, since they have the same format.
+
 ## Core Architecture
 
 1. **`Router`**: The root-level reactive controller. It manages `window.history`, intercepts global `popstate` events, and registers itself globally at `globalThis.__lit_router_main`. There should only be one `Router` per application.
@@ -13,7 +17,7 @@ Intuitive routing for Lit framework,made to be a faster, powerful and flexible r
 3. **`Navigation`**: A high-level reactive controller for imperative navigation. It discovers the active routing context via custom DOM events (`lit-routes-acknowledge`) and proxies commands to the root router while preserving context.
 4. **`ReactRouterScorer`**: Calculates match specificity based on static segments, dynamic segments, optionals, and wildcards. It ensures the most specific route always matches first regardless of array order.
 
-## Defining Routes
+### Defining Routes
 
 Routes are defined as an array of configuration objects passed to a `Router` or `RoutesController`:
 
@@ -27,7 +31,7 @@ const routes = [
 ];
 ```
 
-### Supported Path Syntaxes
+#### Supported Path Syntaxes
 
 - **Static**: `/about`
 - **Dynamic**: `/user/:id`
@@ -37,7 +41,7 @@ const routes = [
 
 > **⚠️ IMPORTANT LLM NOTE regarding `exact`**: The `exact: true` property is explicitly **NOT** supported or implemented by the scorer. Do not suggest or use `exact: true` in route configurations.
 
-## Rendering Outlets
+### Rendering Outlets
 
 To render the current matched route, call the controller's `outlet()` method inside the host LitElement's `render` function:
 
@@ -49,11 +53,11 @@ render() {
 
 This generates a `<lit-router-outlet>` wrapper that propagates lifecycle events down to nested child routes automatically.
 
-## Contextual Navigation (`Navigation` Controller)
+### Contextual Navigation (`Navigation` Controller)
 
 Instantiate `new Navigation(this)` controller in your Lit component to access contextual navigation methods.
 
-### 1. `navigate(pathname, options)`
+#### 1. `navigate(pathname, options)`
 
 Navigates to an absolute or relative path.
 
@@ -93,7 +97,7 @@ this.navigator.navigate("/dashboard?filter=archived", {
   - `extraParams`: Additional custom parameters
   - `hash`: Hash fragment
 
-### 2. Hierarchical State (`push` and `pop`)
+#### 2. Hierarchical State (`push` and `pop`)
 
 `Navigation` supports advanced memory management for sub-routing, allowing a child view to be pushed and later popped while seamlessly restoring the parent's previous URL state.
 
@@ -108,7 +112,7 @@ await this.navigator.push("./settings", { searchParams: { tab: "profile" } });
 await this.navigator.pop({ ignoreSavedState: false });
 ```
 
-### 3. State Accessors
+#### 3. State Accessors
 
 The `Navigation` controller provides getters and setters for the current state:
 
@@ -116,7 +120,7 @@ The `Navigation` controller provides getters and setters for the current state:
 - `this.navigator.searchParams`: Current query string parsed into a key-value object. Can be directly mutated via setter to update URL in-place.
 - `this.navigator.hash`: Current hash fragment.
 
-## Enter & Leave Guards (Hooks)
+### Enter & Leave Guards (Hooks)
 
 Routes can define `enter` and `leave` hooks to guard navigation. They can be sync or async. Returning `false` immediately aborts the navigation.
 
@@ -141,7 +145,7 @@ Routes can define `enter` and `leave` hooks to guard navigation. They can be syn
 - `extraParams`: In-memory history state.
 - `hash`: URL hash.
 
-## Hardcoded redirection in `enter` hook
+### Hardcoded redirection in `enter` hook
 
 Routes that only redirect should declare their render hook but returning `null` or `nothing`.
 
@@ -155,15 +159,6 @@ Routes that only redirect should declare their render hook but returning `null` 
   render: () => null
 }
 ```
-
-## Dynamic Routing (Deprecated)
-
-The library supports mutating the route table at runtime:
-
-- `router.addRoute(routeObj, index?)`: Inserts a route and evaluates if it matches the current path immediately.
-- `router.removeRoute(pathOrRoute)`: Removes an existing route.
-- `router.setRoutes(routesArray)`: Entirely replaces the current route table.
-- `router.clearRoutes(keepFallback)`: Wipes all configured routes.
 
 ## LLM Developer Guidelines
 

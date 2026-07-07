@@ -1,7 +1,7 @@
 import { defineConfig } from "vite";
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from "fs";
 import { readdir } from "fs/promises";
-import { resolve, dirname } from "path";
+import { resolve, dirname, basename } from "path";
 import { marked } from "marked";
 
 marked.use({
@@ -49,29 +49,49 @@ function parseFrontmatter(raw) {
 }
 
 async function generateDataFile() {
-  const files = (await readdir(docsDir)).filter((f) => f.endsWith(".md"));
-  const sections = [];
+  const files = (await readdir(docsDir, { recursive: true })).filter((f) => f.endsWith(".md"));
+  const documents = {}
 
   for (const file of files) {
     const raw = readFileSync(resolve(docsDir, file), "utf-8");
     const { attributes, body } = parseFrontmatter(raw);
+
+    const category = basename(dirname(resolve(docsDir, file)));
+    if (documents[category] === undefined) {
+      documents[category] = {
+        sections: []
+      }
+    }
+
+    if (file.endsWith("/index.md")) {
+      documents[category] = {
+        order: parseInt(attributes.order || "99", 10),
+        ...attributes,
+        ...documents[category],
+      }
+      continue;
+    }
+
     const html = transformBashBlocks(marked.parse(body));
-    sections.push({
+    documents[category].sections.push({
       id: attributes.id || "",
       title: attributes.name || "",
       order: parseInt(attributes.order || "99", 10),
+      category,
       html,
     });
   }
 
-  sections.sort((a, b) => a.order - b.order);
+  for (let category in documents) {
+    documents[category].sections.sort((a, b) => a.order - b.order);
+  }
 
   const outDir = dirname(outputFile);
   if (!existsSync(outDir)) mkdirSync(outDir, { recursive: true });
 
   writeFileSync(
     outputFile,
-    `export const sections = ${JSON.stringify(sections, null, 2)};\n`
+    `export const ducuments = ${JSON.stringify(documents, null, 2)};\n`
   );
 }
 
