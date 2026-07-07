@@ -172,3 +172,61 @@ The library supports mutating the route table at runtime:
 - Nested routers (`RoutesController`) **must** correspond to a parent route ending with a wildcard (`/*`). The parent router will automatically propagate the remaining URL \"tail\" down to the child.
 - State strictly belonging to the session memory should go in `extraParams`, while state intended to be bookmarkable should go into `searchParams`.
 - Ignore the existence of `exact: true`. It is irrelevant for `lit-router`.
+
+---
+
+
+## 1. Corrections to Existing Content
+
+Specific adjustments to current pages. These do not add new content: they correct
+errors, inconsistencies, and duplicates that have been detected.
+
+| # | Issue | Location | Action |
+|---|----------|-----------|--------|
+| 1 | **Broken anchor link.** The deep link to *“Fires on the `<a>` element when an anchor click causes a non-`InvalidNavigationError`. Already covered in Anchor Links — use try/catch for programmatic errors»* does not resolve the issue. | *Router Instance API* → Custom Events / Error Handling section | Fix the anchor destination (correct ID) and verify that it points to the live section of *Anchor Links*. |
+| 2 | **Column order reversed.** In the table, the column order is the reverse of the section title; both should match. | *Anchor Links* → **Programmatic vs. Anchor Navigation** | Reorder the columns to match the title’s order: *Programmatic* first, then *Anchor*. |
+| 3 | **Duplicate table.** The *Path Pattern Reference* appears twice. | *Route Matching* / *Advanced Path Syntaxes* | Consolidate into **a single** table/section for route pattern references. |
+| 4 | **Non-contiguous sections.** *Scoring in Practice* and *Scoring Priority* are separated even though they cover the same topic. | *Route Matching* + *Advanced Path Syntaxes* | Place them **next to each other** (see the *Explanation* section: “How route scoring works”). |
+| 5 | **Repeated warning.** It is mentioned **twice** that *named wildcards* do not work with *nested routing*. | *Advanced Path Syntaxes* + *Nested Routing* | Place the warning in **a single** canonical location and reference it from the other. |
+
+## Error handling
+
+New section dedicated to the **efficient handling of predefined error types**:
+
+- `InvalidNavigationError`
+- `RouteNotFoundError`
+
+Additionally, the **“Common Mistake”** section, which is currently located under *Nested Routing*, should
+**be listed and explained here**, with a reference back to the original section
+[*Nested Routing*](docs/nested-syntax.md) as the canonical source.
+
+## 3. Diataxis Structure (Objective)
+
+Complete reorganization based on the four Diataxis quadrants.
+
+### 📘 Getting Started *(Tutorial — focused on learning)*
+
+- **Installation**
+- **Your First Router (Quickstart)** — taken from *Basic Setup* + *Rendering Outlets*.
+
+### 🔧 Guides *(How-to — problem-solving)*
+
+- **Nested Routing**
+- **Guards / Lifecycle**
+- **Anchor Links**
+- **Route API — Push / Pop Patterns**
+
+### 📖 Reference *(Information-oriented — for reference)*
+
+- **Router Instance API**
+- **Navigation Controller API**
+- **Path Syntax**
+- **Route configuration**
+
+### 💡 Explanation *(Understanding-oriented — for understanding)*
+
+- **How route scoring works** — combines *Scoring in Practice* + *Scoring Priority* (§1.4).
+- **Tail propagation in nested routing**
+- **The navigation lifecycle order**
+- **`goto()` vs `navigate()`**
+

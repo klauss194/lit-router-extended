@@ -130,7 +130,7 @@ _onLinkError(e) {
 
 The event bubbles, so a single listener on a parent element covers all descendant links. The `detail` object contains `{ url, error }`.
 
-### Programmatic vs Anchor Navigation
+###  Anchor Navigation vs Programmatic
 
 | | `<a href="/users">` | `this.nav.navigate("/users")` |
 |---|---|---|

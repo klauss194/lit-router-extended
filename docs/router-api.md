@@ -178,7 +178,7 @@ Event detail: `{ pathname, params, extraParams, searchParams, hash }`.
 
 ### `RouterNavigationErrorEvent` (`lit-router-error`)
 
-Fires on the `<a>` element when an anchor click causes a non-`InvalidNavigationError`. Already covered in [Anchor Links](#) — use `try/catch` for programmatic errors.
+Fires on the `<a>` element when an anchor click causes a non-`InvalidNavigationError`. Already covered in [Anchor Links](#anchor-links) — use `try/catch` for programmatic errors.
 
 ## Error Types
 

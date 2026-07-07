@@ -10,53 +10,21 @@ description: >
 
 ## Route Matching
 
+lit-router compiles route paths into regular expressions at construction time. Paths are matched against the current URL segment by segment. Trailing slashes are tolerated — every compiled pattern ends with `/?$`. Matching is case-sensitive.
+
+### Path Syntaxes
+
+| Pattern | Matches                         | Example                                         |
+|---------|---------------------------------|-------------------------------------------------|
+| static  | Exact literal segment           | `/about` matches `/about`                       |
+| `:param` | Single segment, non-slash chars | `/users/:id` matches `/users/42`                |
+| `:param?` | Zero or one optional segment   | `/search/:query?` matches `/search` and `/search/term` |
+| `*`       | Zero or more trailing segments  | `/admin/*` matches `/admin` and `/admin/settings/users` |
+| `:param*` | Named capture of tail           | `/files/:path*` captures `docs/readme.md` into `params.path` |
+
+### Scoring in Practice
+
 lit-router assigns a numeric score to every route at construction time. Routes are sorted descending by score, so the most specific route is tried first — order of definition does not affect matching.
-
-### Path Pattern Reference
-
-| Pattern | Matches                             |
-|---|-------------------------------------|
-| `/about` | Static segment, exact literal match |
-| `:param` | Single segment, non-slash chars     |
-| `:param?` | Zero or one optional segment        |
-| `*` | Zero or more trailing segments      |
-| `:param*` | Named capture of tail               |
-
-### Catch-all Routes
-
-A standalone `*` matches any URL not handled by previous routes. Because wildcards score lowest, more specific routes naturally win.
-
-```typescript
-class App extends LitElement {
-  _router = new Router(this, [
-    { path: '/',          render: () => html`<home-page></home-page>` },
-    { path: '/users',     render: () => html`<users-page></users-page>` },
-    { path: '/users/:id', render: ({ params }) =>
-      html`<user-page id=${params.id}></user-page>` },
-    { path: '/admin/*',   render: () => html`<admin-layout></admin-layout>` },
-    { path: '*',          render: () => html`<not-found></not-found>` },
-  ]);
-}
-```
-
-`/users` matches the static route, not the dynamic one. `/users/42` matches the dynamic route. `/admin/settings/users` matches the wildcard prefix. `/unknown` matches the catch-all.
-
-The `*` can appear anywhere in the definition array — the scorer deprioritizes it regardless of position.
-
-### Route Names
-
-Assign a `name` to routes for debugging or for use with the `Navigation` controller's `routeName` property:
-
-```typescript
-{ path: '/dashboard', name: 'dashboard', render: () => html`<dashboard-page></dashboard-page>` }
-
-// In a child component:
-// this.nav.routeName === 'dashboard'
-```
-
-## Scoring in Practice
-
-The scoring formula rewards specificity. Static segments score highest, then dynamic parameters, then wildcards. Below are navigation scenarios that show which route wins and why.
 
 #### Static beats dynamic for the same prefix
 
@@ -127,4 +95,68 @@ const _router = new Router(this, [
 | `/pricing` | `cms-page` | No static match for `pricing`. `:page` captures it. `*` also matches but scores lower |
 | `/unknown/deep/path` | `not-found` | Nothing else matches — too many segments for `:page`, no prefix match for static routes. `*` catches everything as last resort |
 
-Tiebreakers when scores are equal: specificity (ratio of static to total segments), then insertion order in the routes array.
+### Catch-all and 404 Routes
+
+A standalone `*` matches any URL not handled by specific routes. Because wildcards score lowest, more specific routes naturally win. The `*` can appear anywhere in the definition array — the scorer deprioritizes it regardless of position.
+
+```typescript
+class App extends LitElement {
+  _router = new Router(this, [
+    { path: '/',              render: () => html`<home-page></home-page>` },
+    { path: '/dashboard',     render: () => html`<dashboard-page></dashboard-page>` },
+    { path: '/user/account',  render: () => html`<account-page></account-page>` },
+    { path: '*',              render: () => html`<not-found></not-found>` },
+  ]);
+}
+```
+
+Navigating to `/user` matches `*` — the static route `/user/account` does not match because it requires the full segment. The wildcard acts as a catch-all 404.
+
+A named wildcard `/:param*` captures the tail into `params`:
+
+```typescript
+{
+  path: '/:missingUrl*',
+  render: ({ params }) =>
+    html`<not-found .url=${params.missingUrl}></not-found>`,
+}
+```
+
+> **Note:** Named wildcards (`:param*`) capture tail segments but are not compatible with nested routing. Use plain `*` for routes that have child `Routes` controllers.
+
+### Route Names
+
+Assign a `name` to routes for debugging or for use with the `Navigation` controller's `routeName` property:
+
+```typescript
+{ path: '/dashboard', name: 'dashboard', render: () => html`<dashboard-page></dashboard-page>` }
+
+// In a child component:
+// this.nav.routeName === 'dashboard'
+```
+
+### How Routes Are Scored
+
+Routes are ranked by a numeric score before matching. Higher scores are tried first, regardless of definition order. Tiebreakers when scores are equal: specificity (ratio of static to total segments), then insertion order in the routes array.
+
+| Segment type | Weight |
+|---|---|
+| Static | 1000 |
+| Dynamic (`:param`) | 100 |
+| Optional (`:param?`) | 10 |
+| Depth (per segment) | 1 |
+| Wildcard (`*`) | -50 |
+
+Static routes always outrank dynamic ones. A route `/foo/bar` scores higher than `/foo/:param` even if the latter is defined first.
+
+```typescript
+class App extends LitElement {
+  _router = new Router(this, [
+    { name: 'dynamic', path: '/foo/:param', render: () => html`<dynamic-page></dynamic-page>` },
+    { name: 'static',  path: '/foo/bar',    render: () => html`<static-page></static-page>` },
+  ]);
+}
+```
+
+- Navigating to `/foo/blue` matches `dynamic` — `:param` captures `"blue"`
+- Navigating to `/foo/bar` matches `static` — the higher score wins over `dynamic`
