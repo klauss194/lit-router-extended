@@ -7,7 +7,7 @@ order: 2
 `Navigation` is a Lit Reactive Controller that gives components access to the router without being a route itself.
 
 ```typescript
-import { Navigation } from 'lit-router';
+import { Navigation } from 'lit-router-extended';
 class UserProfile extends LitElement {
   nav = new Navigation(this);
 }

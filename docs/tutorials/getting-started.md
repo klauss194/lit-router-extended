@@ -10,7 +10,7 @@ description: >
 
 ## Getting Started
 
-Welcome to `lit-router`! This guide will walk you through setting up a basic application, defining your first routes, and using our reactive controllers to manage navigation seamlessly.
+Welcome to `lit-router-extended`! This guide will walk you through setting up a basic application, defining your first routes, and using our reactive controllers to manage navigation seamlessly.
 
 **Let's start by creating your application's root component and instantiating the main `Router`**.
 
@@ -197,7 +197,7 @@ export class AppRoot extends LitElement {
 
 ### Nested Routing (Sub-Routes)
 
-Large applications often require nested layouts, such as a dashboard with its own internal navigation. `lit-router` makes this seamless through structural **DOM nesting**.
+Large applications often require nested layouts, such as a dashboard with its own internal navigation. `lit-router-extended` makes this seamless through structural **DOM nesting**.
 To create nested routes, the parent route must end with a wildcard (`*`). This tells the `Router` to capture the remaining URL (the "tail") and pass it down to any child `Routes` controller inside its outlet.
 Let's create an `AppDashboard` component that manages its own sub-routes using the `Routes` controller (notice it's Routes, not `Router`).
 

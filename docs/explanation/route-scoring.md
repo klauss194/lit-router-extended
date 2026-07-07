@@ -6,7 +6,7 @@ order: 3
 
 ## How Routes Are Scored
 
-`lit-router` assigns a numeric score to every route at construction time. Routes are sorted descending by score, so **the most specific route is tried first**. The order in which you define them in the array does not matter.
+`lit-router-extended` assigns a numeric score to every route at construction time. Routes are sorted descending by score, so **the most specific route is tried first**. The order in which you define them in the array does not matter.
 
 | Segment type | Weight |
 |---|---|

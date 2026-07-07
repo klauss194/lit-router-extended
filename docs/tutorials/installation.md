@@ -6,7 +6,7 @@ order: 1
 
 ## Installation
 
-Install lit-router via npm. The package has no external dependencies.
+Install `lit-router-extended` via npm. The package has no external dependencies.
 
 ```bash
 npm install lit-router-extended
@@ -18,7 +18,7 @@ Create a `Router` instance inside your LitElement. `Router` is a [Reactive Contr
 
 ```typescript
 import { LitElement, html } from 'lit';
-import Router from 'lit-router';
+import Router from 'lit-router-extended';
 
 class MyApp extends LitElement {
   _router = new Router(this, [

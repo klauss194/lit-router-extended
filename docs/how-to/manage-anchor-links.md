@@ -6,7 +6,7 @@ order: 1
 
 ## Basic Usage
 
-Zero configuration is required for standard routing. Drop `<a>` elements anywhere in your templates, and `lit-router` will handle them.
+Zero configuration is required for standard routing. Drop `<a>` elements anywhere in your templates, and `lit-router-extended` will handle them.
 
 ```html
 <nav>
