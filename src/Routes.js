@@ -9,6 +9,7 @@ import { joinPaths } from "./util/url.js";
 
 import "./contrib/lit-outlet.js";
 import { Route } from "./Route.js";
+import {RouterNavigationErrorEvent} from "./RoutesEvents.js";
 
 /**
  * Sentinel Route used by passthrough routers (no routes, no fallback).
@@ -150,7 +151,21 @@ export class Routes extends AbstractController {
         return;
       }
 
-      throw error;
+      const res = child._host?.dispatchEvent(
+          new RouterNavigationErrorEvent({
+            url: this.state.tailGroup,
+            error
+          })
+      );
+
+      // is not cancellable means that precentDefault was called
+      if(res === false) {
+        return;
+      }
+
+      queueMicrotask(() => {
+        throw error;
+      });
     }
   }
 
@@ -483,9 +498,18 @@ export class Routes extends AbstractController {
       children: childArray.map((c) => c._host.nodeName),
     });
 
-    await Promise.all(
+   await Promise.all(
       childArray.map(async (child) => {
-        return child._gotoInternal(pathname, context, false, "propagate");
+         try {
+           await child._gotoInternal(pathname, context, false, "propagate");
+         } catch(error) {
+           child._host.dispatchEvent(
+               new RouterNavigationErrorEvent({
+                 url: pathname,
+                 error,
+               })
+           );
+         }
       }),
     );
   }

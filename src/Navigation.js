@@ -256,7 +256,7 @@ export class Navigation {
    *   hash?: string,
    * }} [options] - Configuration options
    */
-  pop({ preserveSearchParams = false, searchParams, hash } = {}) {
+  async pop({ preserveSearchParams = false, searchParams, hash } = {}) {
     // When searchParams/hash are not provided (undefined), the router will
     // preserve existing state automatically. When explicitly provided, those
     // values are forwarded as-is.
@@ -276,7 +276,7 @@ export class Navigation {
     if (hasTail && this.#current.state?.tailGroup !== "/") {
       const currentPath = this.#current.link();
       const currentExtraParams = this.#current.state?.extraParams || {};
-      this.#router.navigate(currentPath, {
+      await this.#router.navigate(currentPath, {
         ...currentExtraParams,
         searchParams: finalSearchParams,
         hash: finalHash,
@@ -291,7 +291,7 @@ export class Navigation {
 
     const parentPath = this.#parent.link();
     const parentExtraParams = this.#parent.state?.extraParams || {};
-    this.#router.navigate(parentPath, {
+    await this.#router.navigate(parentPath, {
       ...parentExtraParams,
       searchParams: finalSearchParams,
       hash: finalHash,
