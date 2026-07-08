@@ -47,6 +47,12 @@ export class AppNav extends LitElement {
                                 @click=${() => this.navigation.navigate("/users")}
                         >Users</button>
                     </li>
+                    <li>
+                        <button
+                                class=${classMap({"active": this.navigation.pathname.startsWith("/error-demo") })}
+                                @click=${() => this.navigation.navigate("/error-demo")}
+                        >Error Demo</button>
+                    </li>
                 </ul>
             </nav>
         `;
