@@ -4,7 +4,8 @@ import { Router } from "lit-router-extended";
 import "./nav-component.js";
 import "./users-component.js";
 import "./about-component.js";
-import  "./dashboard-component.js";
+import "./dashboard-component.js";
+import "./error-demo-component.js";
 
 export class AppRoot extends LitElement {
     router = new Router(this, [
@@ -17,6 +18,7 @@ export class AppRoot extends LitElement {
         { path: '/about', render: () => html`<app-about></app-about>` },
         { path: '/dashboard/*', render: () => html`<app-dashboard></app-dashboard>` },
         { path: '/users/*', render: () => html`<app-users></app-users>` },
+        { path: '/error-demo/*', render: () => html`<error-demo></error-demo>` },
         {
             path: '*',
             render: () => html`
